@@ -88,7 +88,7 @@ export default function App() {
   const fetchWorkers = async () => {
     setLoading(true);
     try {
-      const url = `http://127.0.0.1:8000/api/workers?lat=${lat}&lon=${lon}`;
+      const url = `https://2you-backend.onrender.com/api/workers?lat=${lat}&lon=${lon}`;
       const res = await fetch(url);
       const data = await res.json();
       const fetchedWorkers = data.workers || [];
