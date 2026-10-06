@@ -4,15 +4,13 @@ import React, { useState, useEffect } from 'react';
 // 1. FREELANCER DASHBOARD COMPONENT (Flowchart)
 // ==========================================
 function FreelancerDashboard({ email, onLogout }) {
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'requests'
-  
-  // Profile state matching flowchart
+  const [activeTab, setActiveTab] = useState('profile');
+
   const [skills, setSkills] = useState('Plumbing, Tap Repair, Pipe Fitting');
   const [experience, setExperience] = useState('4 years of experience in residential plumbing and maintenance.');
   const [workingEvidence, setWorkingEvidence] = useState('https://drive.google.com/portfolio-sample');
   const [msg, setMsg] = useState('');
 
-  // Requested services (Individual & Group Services + Negotiation)
   const [requests, setRequests] = useState([
     { id: 1, type: 'Individual Service', client: 'Saniya', service: 'Plumbing Repair', proposedPrice: '₹450', status: 'Pending' },
     { id: 2, type: 'Group Service', client: 'Gachibowli Community', service: 'Building Maintenance', proposedPrice: '₹3,500', status: 'Pending' }
@@ -56,7 +54,6 @@ function FreelancerDashboard({ email, onLogout }) {
         </button>
       </header>
 
-      {/* Navigation Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', backgroundColor: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
         <button 
           onClick={() => setActiveTab('profile')} 
@@ -72,7 +69,6 @@ function FreelancerDashboard({ email, onLogout }) {
         </button>
       </div>
 
-      {/* TAB 1: Profile (Skills, Experience, Evidence) */}
       {activeTab === 'profile' && (
         <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>Manage Freelancer Credentials</h3>
@@ -113,7 +109,6 @@ function FreelancerDashboard({ email, onLogout }) {
         </form>
       )}
 
-      {/* TAB 2: Requested Services */}
       {activeTab === 'requests' && (
         <div>
           <h3 style={{ margin: '0 0 16px 0', color: '#0f172a' }}>Incoming Service Requests</h3>
@@ -151,31 +146,26 @@ function FreelancerDashboard({ email, onLogout }) {
 // 2. MAIN APP COMPONENT
 // ==========================================
 export default function App() {
-  // Login & Role States
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState('customer'); // 'customer' or 'freelancer'
+  const [role, setRole] = useState('customer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // Marketplace States
   const [workers, setWorkers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Cart Feature State
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Multi-Service Package State
-const [isPackageOpen, setIsPackageOpen] = useState(false);
-const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
-const [isSelectingPackage, setIsSelectingPackage] = useState(false);
-const [packageSelections, setPackageSelections] = useState({});
+  // Multi-Service Package Page States
+  const [isPackagePageOpen, setIsPackagePageOpen] = useState(false);
+  const [packageStep, setPackageStep] = useState(1); // Step 1: Select Categories, Step 2: Pick Freelancers
+  const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
 
-  // Default coordinates: Hitec City, Hyderabad
   const [lat] = useState(17.4435);
   const [lon] = useState(78.3772);
 
@@ -191,7 +181,7 @@ const [packageSelections, setPackageSelections] = useState({});
     if (name.includes('cleaner')) return '🧹';
     if (name.includes('gardener')) return '🪴';
     if (name.includes('driver')) return '🚗';
-    if (name.includes('ac')) return '❄️';
+    if (name.includes('ac')) return '❄️️';
     if (name.includes('cook')) return '🍳';
     if (name.includes('mechanic')) return '⚙️';
     if (name.includes('tailor')) return '🧵';
@@ -269,24 +259,13 @@ const [packageSelections, setPackageSelections] = useState({});
   }, [isLoggedIn, role]);
 
   const togglePackageCategory = (category) => {
-  setSelectedPackageCategories(prev =>
-    prev.includes(category)
-      ? prev.filter(cat => cat !== category)
-      : [...prev, category]
-  );
-};
+    setSelectedPackageCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(cat => cat !== category)
+        : [...prev, category]
+    );
+  };
 
-const startPackage = () => {
-  if (selectedPackageCategories.length === 0) {
-    alert('Please select at least one service.');
-    return;
-  }
-
-  setIsPackageOpen(false);
-  setIsSelectingPackage(true);
-  setSelectedCategory(selectedPackageCategories[0]);
-  setSearchQuery('');
-};
   const addToCart = (worker) => {
     const exists = cartItems.find(item => item.worker_id === worker.worker_id);
     if (exists) {
@@ -428,6 +407,221 @@ const startPackage = () => {
   }
 
   // ----------------------------------------------------
+  // FEATURE 3: DEDICATED MULTI-SERVICE PACKAGE PAGE
+  // ----------------------------------------------------
+  if (isPackagePageOpen) {
+    return (
+      <div style={{ fontFamily: 'Segoe UI, sans-serif', padding: '24px', maxWidth: '1100px', margin: '0 auto', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+        {/* Header */}
+        <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' }}>
+          <div>
+            <h1 style={{ margin: '0 0 4px 0', color: '#2563eb', fontSize: '30px', fontWeight: '800' }}>🧩 Build Your Service Package</h1>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Bundle multiple services together for your custom project</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              style={{ padding: '8px 16px', borderRadius: '6px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}
+            >
+              🛒 Cart ({cartItems.length})
+            </button>
+            <button
+              onClick={() => { setIsPackagePageOpen(false); setPackageStep(1); }}
+              style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+            >
+              Exit Package Mode ✕
+            </button>
+          </div>
+        </header>
+
+        {/* STEP 1: SELECT CATEGORIES */}
+        {packageStep === 1 && (
+          <div>
+            <h2 style={{ fontSize: '20px', color: '#0f172a', marginBottom: '8px' }}>Step 1: Choose the services you need</h2>
+            <p style={{ color: '#64748b', marginBottom: '20px' }}>Select all service categories required for your project:</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              {categories.map((cat) => {
+                const isSelected = selectedPackageCategories.includes(cat);
+                return (
+                  <div
+                    key={cat}
+                    onClick={() => togglePackageCategory(cat)}
+                    style={{
+                      border: isSelected ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                      backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    <span style={{ fontSize: '32px' }}>{getCategoryIcon(cat)}</span>
+                    <div>
+                      <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px' }}>{cat}</div>
+                      <div style={{ fontSize: '12px', color: isSelected ? '#2563eb' : '#64748b', marginTop: '2px', fontWeight: isSelected ? 'bold' : 'normal' }}>
+                        {isSelected ? '✓ Selected' : 'Click to select'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', padding: '16px 20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <span style={{ fontSize: '15px', color: '#334155' }}>
+                Selected Services: <strong>{selectedPackageCategories.length}</strong>
+              </span>
+              <button
+                onClick={() => setPackageStep(2)}
+                disabled={selectedPackageCategories.length === 0}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: selectedPackageCategories.length > 0 ? '#2563eb' : '#94a3b8',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  cursor: selectedPackageCategories.length > 0 ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Continue → Select Freelancers
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: SELECT FREELANCERS PER CATEGORY */}
+        {packageStep === 2 && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '20px', color: '#0f172a', margin: 0 }}>Step 2: Pick Freelancers for your Package</h2>
+                <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>Select a provider for each category in your package:</p>
+              </div>
+              <button
+                onClick={() => setPackageStep(1)}
+                style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+              >
+                ← Back to Service Selection
+              </button>
+            </div>
+
+            {selectedPackageCategories.map((cat) => {
+              const categoryWorkers = workers.filter(w => w.category?.toLowerCase() === cat.toLowerCase());
+              return (
+                <div key={cat} style={{ marginBottom: '28px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>{getCategoryIcon(cat)}</span> {cat} Professionals
+                  </h3>
+
+                  {categoryWorkers.length === 0 ? (
+                    <p style={{ color: '#64748b', fontSize: '14px' }}>No professionals available for this category near you.</p>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                      {categoryWorkers.map((worker) => {
+                        const isInCart = cartItems.some(item => item.worker_id === worker.worker_id);
+                        return (
+                          <div key={worker.worker_id} style={{ border: '1px solid #cbd5e1', padding: '14px', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
+                            <h4 style={{ margin: '0 0 4px 0', color: '#0f172a' }}>{worker.name}</h4>
+                            <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#475569' }}>📍 {worker.address}</p>
+                            <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#2563eb', fontWeight: 'bold' }}>₹{worker.hourly_rate || 350}/hr</p>
+                            
+                            <button
+                              onClick={() => addToCart(worker)}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                backgroundColor: isInCart ? '#16a34a' : '#2563eb',
+                                color: '#ffffff',
+                                fontWeight: '600',
+                                fontSize: '13px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {isInCart ? '✓ Added to Package' : '+ Add to Package'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                style={{ padding: '14px 32px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+              >
+                Review Package & Book ({cartItems.length} items)
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE-OVER CART DRAWER */}
+        {isCartOpen && (
+          <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a' }}>2You Package Cart</h2>
+                <button onClick={() => setIsCartOpen(false)} style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', color: '#64748b' }}>✕</button>
+              </div>
+
+              {cartItems.length === 0 ? (
+                <p style={{ color: '#64748b', textAlign: 'center', marginTop: '40px' }}>Your package cart is empty.</p>
+              ) : (
+                <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
+                  {cartItems.map((item) => (
+                    <div key={item.worker_id} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px', color: '#0f172a' }}>
+                        <span>{item.name} ({item.category})</span>
+                        <button onClick={() => removeFromCart(item.worker_id)} style={{ color: '#dc2626', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
+                      </div>
+                      <p style={{ margin: '4px 0 8px 0', fontSize: '12px', color: '#64748b' }}>Rate: ₹{item.rate}/hr</p>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', color: '#334155' }}>Hours:</span>
+                        <button onClick={() => updateHours(item.worker_id, -1)} style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer' }}>-</button>
+                        <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{item.hours}</span>
+                        <button onClick={() => updateHours(item.worker_id, 1)} style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', cursor: 'pointer' }}>+</button>
+                        <span style={{ marginLeft: 'auto', fontWeight: 'bold', color: '#2563eb' }}>₹{item.rate * item.hours}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {cartItems.length > 0 && (
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
+                  <span>Total Estimated Cost:</span>
+                  <span>₹{calculateTotal()}</span>
+                </div>
+                <button 
+                  onClick={() => alert('Package Booking Placed Successfully! Service providers notified.')}
+                  style={{ width: '100%', padding: '12px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
+                >
+                  Confirm Package Booking
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ----------------------------------------------------
   // FEATURE 2: CUSTOMER MARKETPLACE VIEW
   // ----------------------------------------------------
   return (
@@ -514,277 +708,60 @@ const startPackage = () => {
         />
       </div>
 
-    {/* MULTI-SERVICE PACKAGE */}
-<div
-  onClick={() => {
-    setSelectedPackageCategories([]);
-    setPackageSelections({});
-    setIsPackageOpen(true);
-  }}
-  style={{
-    backgroundColor: '#eff6ff',
-    border: '1px solid #93c5fd',
-    borderRadius: '12px',
-    padding: '16px 20px',
-    marginBottom: '28px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
-  }}
->
-  <div>
-    <h2
-      style={{
-        margin: '0 0 5px 0',
-        fontSize: '20px',
-        color: '#1e40af',
-        fontWeight: '700'
-      }}
-    >
-      🧩 Build Your Package
-    </h2>
-
-    <p
-      style={{
-        margin: 0,
-        color: '#475569',
-        fontSize: '14px',
-        fontWeight: '500'
-      }}
-    >
-      BOOK MULTISERVICE
-    </p>
-  </div>
-
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      setSelectedPackageCategories([]);
-      setPackageSelections({});
-      setIsPackageOpen(true);
-    }}
-    style={{
-      padding: '10px 18px',
-      borderRadius: '6px',
-      border: 'none',
-      backgroundColor: '#2563eb',
-      color: '#ffffff',
-      fontWeight: '600',
-      fontSize: '14px',
-      cursor: 'pointer'
-    }}
-  >
-    Build Package →
-  </button>
-</div>
-      
-    {isPackageOpen ? (
-  <div
-    style={{
-      minHeight: '70vh',
-      padding: '30px 20px',
-      backgroundColor: '#f8fafc'
-    }}
-  >
-    {/* HEADER */}
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px',
-        marginBottom: '30px'
-      }}
-    >
-      <button
-        onClick={() => setIsPackageOpen(false)}
-        style={{
-          padding: '10px 16px',
-          border: '1px solid #cbd5e1',
-          backgroundColor: '#ffffff',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontWeight: '600'
-        }}
-      >
-        ← Back
-      </button>
-
-      <div>
-        <h1
-          style={{
-            margin: 0,
-            fontSize: '28px',
-            color: '#1e293b'
-          }}
-        >
-          🧩 Build Your Package
-        </h1>
-
-        <p
-          style={{
-            margin: '6px 0 0',
-            color: '#64748b'
-          }}
-        >
-          Select multiple services and build one package
-        </p>
-      </div>
-    </div>
-
-    {/* STEP 1 */}
-    <div
-      style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '24px',
-        border: '1px solid #e2e8f0',
-        marginBottom: '25px'
-      }}
-    >
-      <h2
-        style={{
-          marginTop: 0,
-          color: '#1e293b'
-        }}
-      >
-        1. Select Services
-      </h2>
-
-      <p style={{ color: '#64748b' }}>
-        Choose the types of freelancers you need for your project.
-      </p>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '15px'
-        }}
-      >
-        {categories.map((category) => {
-          const isSelected =
-            selectedPackageCategories.includes(category);
-
-          return (
-            <div
-              key={category}
-              onClick={() => {
-                setSelectedPackageCategories((prev) =>
-                  isSelected
-                    ? prev.filter((item) => item !== category)
-                    : [...prev, category]
-                );
-              }}
-              style={{
-                padding: '18px',
-                borderRadius: '10px',
-                border: isSelected
-                  ? '2px solid #2563eb'
-                  : '1px solid #cbd5e1',
-                backgroundColor: isSelected
-                  ? '#eff6ff'
-                  : '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}
-            >
-              <span style={{ fontSize: '25px' }}>
-                {getCategoryIcon(category)}
-              </span>
-
-              <div>
-                <strong>{category}</strong>
-
-                <div
-                  style={{
-                    fontSize: '13px',
-                    color: '#64748b',
-                    marginTop: '4px'
-                  }}
-                >
-                  {isSelected
-                    ? '✓ Selected'
-                    : 'Click to select'}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* SELECTED SERVICES */}
-    {selectedPackageCategories.length > 0 && (
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          padding: '24px',
-          border: '1px solid #e2e8f0'
-        }}
-      >
-        <h2
-          style={{
-            marginTop: 0,
-            color: '#1e293b'
-          }}
-        >
-          Selected Services
-        </h2>
-
+      {/* MULTI-SERVICE PACKAGE BANNER (ONLY SHOWN ON HOME SERVICE GRID VIEW) */}
+      {!selectedCategory && (
         <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '10px'
-          }}
-        >
-          {selectedPackageCategories.map((category) => (
-            <div
-              key={category}
-              style={{
-                padding: '10px 15px',
-                backgroundColor: '#eff6ff',
-                color: '#1e40af',
-                borderRadius: '20px',
-                fontWeight: '600'
-              }}
-            >
-              {getCategoryIcon(category)} {category}
-            </div>
-          ))}
-        </div>
-
-        <button
           onClick={() => {
-            setIsPackageOpen(false);
-            setIsSelectingPackage(true);
+            setSelectedPackageCategories([]);
+            setPackageStep(1);
+            setIsPackagePageOpen(true);
           }}
           style={{
-            marginTop: '25px',
-            padding: '13px 22px',
-            border: 'none',
-            borderRadius: '8px',
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
-            fontWeight: '600',
-            fontSize: '15px',
-            cursor: 'pointer'
+            backgroundColor: '#eff6ff',
+            border: '1px solid #93c5fd',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '28px',
+            display: 'flex',
+            justify: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
           }}
         >
-          Continue → Select Freelancers
-        </button>
-      </div>
-    )}
+          <div>
+            <h2 style={{ margin: '0 0 5px 0', fontSize: '20px', color: '#1e40af', fontWeight: '700' }}>
+              🧩 Build Your Package
+            </h2>
+            <p style={{ margin: 0, color: '#475569', fontSize: '14px', fontWeight: '500' }}>
+              BOOK MULTISERVICE
+            </p>
+          </div>
 
-  </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedPackageCategories([]);
+              setPackageStep(1);
+              setIsPackagePageOpen(true);
+            }}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              fontWeight: '600',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            Build Package →
+          </button>
+        </div>
+      )}
 
-
-  ) : loading ? (
+      {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
         
@@ -902,174 +879,7 @@ const startPackage = () => {
           )}
         </div>
       )}
-{/* BUILD YOUR PACKAGE */}
-{isPackageOpen && (
-  <div
-    style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0,0,0,0.45)',
-      zIndex: 2000,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '20px'
-    }}
-  >
-    <div
-      style={{
-        backgroundColor: '#ffffff',
-        width: '100%',
-        maxWidth: '550px',
-        maxHeight: '85vh',
-        overflowY: 'auto',
-        borderRadius: '14px',
-        padding: '24px',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '8px'
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            color: '#0f172a',
-            fontSize: '22px'
-          }}
-        >
-          🧩 Build Your Package
-        </h2>
 
-        <button
-          onClick={() => setIsPackageOpen(false)}
-          style={{
-            border: 'none',
-            background: 'transparent',
-            fontSize: '20px',
-            cursor: 'pointer',
-            color: '#64748b'
-          }}
-        >
-          ✕
-        </button>
-      </div>
-
-      <p
-        style={{
-          color: '#64748b',
-          fontSize: '14px',
-          marginBottom: '20px'
-        }}
-      >
-        Select the services you need for your project.
-      </p>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '12px'
-        }}
-      >
-        {categories.map((cat) => {
-          const isSelected = selectedPackageCategories.includes(cat);
-
-          return (
-            <div
-              key={cat}
-              onClick={() => togglePackageCategory(cat)}
-              style={{
-                border: isSelected
-                  ? '2px solid #2563eb'
-                  : '1px solid #cbd5e1',
-                backgroundColor: isSelected
-                  ? '#eff6ff'
-                  : '#ffffff',
-                borderRadius: '10px',
-                padding: '16px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}
-            >
-              <span style={{ fontSize: '28px' }}>
-                {getCategoryIcon(cat)}
-              </span>
-
-              <div>
-                <div
-                  style={{
-                    fontWeight: '700',
-                    color: '#0f172a',
-                    fontSize: '14px'
-                  }}
-                >
-                  {cat}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: '#64748b',
-                    marginTop: '3px'
-                  }}
-                >
-                  {isSelected ? '✓ Selected' : 'Select service'}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div
-        style={{
-          marginTop: '20px',
-          padding: '12px',
-          backgroundColor: '#f8fafc',
-          borderRadius: '8px',
-          fontSize: '14px',
-          color: '#334155'
-        }}
-      >
-        <strong>{selectedPackageCategories.length}</strong>{' '}
-        service{selectedPackageCategories.length !== 1 ? 's' : ''} selected
-      </div>
-
-      <button
-        onClick={startPackage}
-        style={{
-          width: '100%',
-          marginTop: '16px',
-          padding: '12px',
-          backgroundColor:
-            selectedPackageCategories.length > 0
-              ? '#2563eb'
-              : '#94a3b8',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '7px',
-          fontWeight: '700',
-          fontSize: '15px',
-          cursor:
-            selectedPackageCategories.length > 0
-              ? 'pointer'
-              : 'not-allowed'
-        }}
-        disabled={selectedPackageCategories.length === 0}
-      >
-        Continue → Select Freelancers
-      </button>
-    </div>
-  </div>
-)}
       {/* SLIDE-OVER CART DRAWER */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
