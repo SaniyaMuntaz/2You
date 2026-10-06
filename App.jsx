@@ -723,10 +723,11 @@ export default function App() {
             padding: '16px 20px',
             marginBottom: '28px',
             display: 'flex',
-            justify: 'space-between',
+            justifyContent: 'space-between', /* FIXED: changed from 'justify' to 'justifyContent' */
             alignItems: 'center',
             cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
+            boxShadow: '0 2px 4px rgba(37,99,235,0.08)',
+            gap: '16px' /* ADDED: creates guaranteed spacing between text and button */
           }}
         >
           <div>
@@ -753,14 +754,15 @@ export default function App() {
               color: '#ffffff',
               fontWeight: '600',
               fontSize: '14px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap', /* ADDED: prevents button text from breaking into two lines */
+              flexShrink: 0        /* ADDED: prevents button from getting squished */
             }}
           >
             Build Package →
           </button>
         </div>
       )}
-
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
