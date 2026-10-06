@@ -783,7 +783,7 @@ const startPackage = () => {
 
   </div>
 
-) : loading ? (
+
   ) : loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
