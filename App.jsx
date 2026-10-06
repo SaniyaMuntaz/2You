@@ -551,8 +551,6 @@ export default function App() {
 
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
-      {loading ? (
-        <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
         
         /* VIEW 1: SERVICE GRID */
