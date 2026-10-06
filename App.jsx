@@ -173,6 +173,7 @@ export default function App() {
 const [isPackageOpen, setIsPackageOpen] = useState(false);
 const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
 const [isSelectingPackage, setIsSelectingPackage] = useState(false);
+const [packageSelections, setPackageSelections] = useState({});
 
   // Default coordinates: Hitec City, Hyderabad
   const [lat] = useState(17.4435);
@@ -513,9 +514,13 @@ const startPackage = () => {
         />
       </div>
 
-     {/* MULTI-SERVICE PACKAGE */}
+    {/* MULTI-SERVICE PACKAGE */}
 <div
-  onClick={() => setIsPackageOpen(true)}
+  onClick={() => {
+    setSelectedPackageCategories([]);
+    setPackageSelections({});
+    setIsPackageOpen(true);
+  }}
   style={{
     backgroundColor: '#eff6ff',
     border: '1px solid #93c5fd',
@@ -556,6 +561,8 @@ const startPackage = () => {
   <button
     onClick={(e) => {
       e.stopPropagation();
+      setSelectedPackageCategories([]);
+      setPackageSelections({});
       setIsPackageOpen(true);
     }}
     style={{
@@ -573,7 +580,211 @@ const startPackage = () => {
   </button>
 </div>
       
-      {loading ? (
+    {isPackageOpen ? (
+  <div
+    style={{
+      minHeight: '70vh',
+      padding: '30px 20px',
+      backgroundColor: '#f8fafc'
+    }}
+  >
+    {/* HEADER */}
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px',
+        marginBottom: '30px'
+      }}
+    >
+      <button
+        onClick={() => setIsPackageOpen(false)}
+        style={{
+          padding: '10px 16px',
+          border: '1px solid #cbd5e1',
+          backgroundColor: '#ffffff',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontWeight: '600'
+        }}
+      >
+        ← Back
+      </button>
+
+      <div>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: '28px',
+            color: '#1e293b'
+          }}
+        >
+          🧩 Build Your Package
+        </h1>
+
+        <p
+          style={{
+            margin: '6px 0 0',
+            color: '#64748b'
+          }}
+        >
+          Select multiple services and build one package
+        </p>
+      </div>
+    </div>
+
+    {/* STEP 1 */}
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        padding: '24px',
+        border: '1px solid #e2e8f0',
+        marginBottom: '25px'
+      }}
+    >
+      <h2
+        style={{
+          marginTop: 0,
+          color: '#1e293b'
+        }}
+      >
+        1. Select Services
+      </h2>
+
+      <p style={{ color: '#64748b' }}>
+        Choose the types of freelancers you need for your project.
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '15px'
+        }}
+      >
+        {categories.map((category) => {
+          const isSelected =
+            selectedPackageCategories.includes(category);
+
+          return (
+            <div
+              key={category}
+              onClick={() => {
+                setSelectedPackageCategories((prev) =>
+                  isSelected
+                    ? prev.filter((item) => item !== category)
+                    : [...prev, category]
+                );
+              }}
+              style={{
+                padding: '18px',
+                borderRadius: '10px',
+                border: isSelected
+                  ? '2px solid #2563eb'
+                  : '1px solid #cbd5e1',
+                backgroundColor: isSelected
+                  ? '#eff6ff'
+                  : '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}
+            >
+              <span style={{ fontSize: '25px' }}>
+                {getCategoryIcon(category)}
+              </span>
+
+              <div>
+                <strong>{category}</strong>
+
+                <div
+                  style={{
+                    fontSize: '13px',
+                    color: '#64748b',
+                    marginTop: '4px'
+                  }}
+                >
+                  {isSelected
+                    ? '✓ Selected'
+                    : 'Click to select'}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* SELECTED SERVICES */}
+    {selectedPackageCategories.length > 0 && (
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          padding: '24px',
+          border: '1px solid #e2e8f0'
+        }}
+      >
+        <h2
+          style={{
+            marginTop: 0,
+            color: '#1e293b'
+          }}
+        >
+          Selected Services
+        </h2>
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}
+        >
+          {selectedPackageCategories.map((category) => (
+            <div
+              key={category}
+              style={{
+                padding: '10px 15px',
+                backgroundColor: '#eff6ff',
+                color: '#1e40af',
+                borderRadius: '20px',
+                fontWeight: '600'
+              }}
+            >
+              {getCategoryIcon(category)} {category}
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => {
+            setIsPackageOpen(false);
+            setIsSelectingPackage(true);
+          }}
+          style={{
+            marginTop: '25px',
+            padding: '13px 22px',
+            border: 'none',
+            borderRadius: '8px',
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            fontWeight: '600',
+            fontSize: '15px',
+            cursor: 'pointer'
+          }}
+        >
+          Continue → Select Freelancers
+        </button>
+      </div>
+    )}
+
+  </div>
+
+) : loading ? (
+  ) : loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
         
