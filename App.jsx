@@ -489,6 +489,68 @@ export default function App() {
         />
       </div>
 
+      {/* MULTI-SERVICE PACKAGE */}
+      <div
+        onClick={() => setIsCartOpen(true)}
+        style={{
+          backgroundColor: '#eff6ff',
+          border: '1px solid #93c5fd',
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginBottom: '28px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              margin: '0 0 5px 0',
+              fontSize: '20px',
+              color: '#1e40af',
+              fontWeight: '700'
+            }}
+          >
+            🧩 Build Your Package
+          </h2>
+
+          <p
+            style={{
+              margin: 0,
+              color: '#475569',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            BOOK MULTISERVICE
+          </p>
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsCartOpen(true);
+          }}
+          style={{
+            padding: '10px 18px',
+            borderRadius: '6px',
+            border: 'none',
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            fontWeight: '600',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          Build Package →
+        </button>
+      </div>
+
+      {loading ? (
+        <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
