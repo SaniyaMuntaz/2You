@@ -169,6 +169,11 @@ export default function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Multi-Service Package State
+const [isPackageOpen, setIsPackageOpen] = useState(false);
+const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
+const [isSelectingPackage, setIsSelectingPackage] = useState(false);
+
   // Default coordinates: Hitec City, Hyderabad
   const [lat] = useState(17.4435);
   const [lon] = useState(78.3772);
@@ -262,6 +267,25 @@ export default function App() {
     }
   }, [isLoggedIn, role]);
 
+  const togglePackageCategory = (category) => {
+  setSelectedPackageCategories(prev =>
+    prev.includes(category)
+      ? prev.filter(cat => cat !== category)
+      : [...prev, category]
+  );
+};
+
+const startPackage = () => {
+  if (selectedPackageCategories.length === 0) {
+    alert('Please select at least one service.');
+    return;
+  }
+
+  setIsPackageOpen(false);
+  setIsSelectingPackage(true);
+  setSelectedCategory(selectedPackageCategories[0]);
+  setSearchQuery('');
+};
   const addToCart = (worker) => {
     const exists = cartItems.find(item => item.worker_id === worker.worker_id);
     if (exists) {
@@ -489,66 +513,66 @@ export default function App() {
         />
       </div>
 
-      {/* MULTI-SERVICE PACKAGE */}
-      <div
-        onClick={() => setIsCartOpen(true)}
-        style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #93c5fd',
-          borderRadius: '12px',
-          padding: '16px 20px',
-          marginBottom: '28px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              margin: '0 0 5px 0',
-              fontSize: '20px',
-              color: '#1e40af',
-              fontWeight: '700'
-            }}
-          >
-            🧩 Build Your Package
-          </h2>
+     {/* MULTI-SERVICE PACKAGE */}
+<div
+  onClick={() => setIsPackageOpen(true)}
+  style={{
+    backgroundColor: '#eff6ff',
+    border: '1px solid #93c5fd',
+    borderRadius: '12px',
+    padding: '16px 20px',
+    marginBottom: '28px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
+  }}
+>
+  <div>
+    <h2
+      style={{
+        margin: '0 0 5px 0',
+        fontSize: '20px',
+        color: '#1e40af',
+        fontWeight: '700'
+      }}
+    >
+      🧩 Build Your Package
+    </h2>
 
-          <p
-            style={{
-              margin: 0,
-              color: '#475569',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-          >
-            BOOK MULTISERVICE
-          </p>
-        </div>
+    <p
+      style={{
+        margin: 0,
+        color: '#475569',
+        fontSize: '14px',
+        fontWeight: '500'
+      }}
+    >
+      BOOK MULTISERVICE
+    </p>
+  </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsCartOpen(true);
-          }}
-          style={{
-            padding: '10px 18px',
-            borderRadius: '6px',
-            border: 'none',
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
-            fontWeight: '600',
-            fontSize: '14px',
-            cursor: 'pointer'
-          }}
-        >
-          Build Package →
-        </button>
-      </div>
-
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setIsPackageOpen(true);
+    }}
+    style={{
+      padding: '10px 18px',
+      borderRadius: '6px',
+      border: 'none',
+      backgroundColor: '#2563eb',
+      color: '#ffffff',
+      fontWeight: '600',
+      fontSize: '14px',
+      cursor: 'pointer'
+    }}
+  >
+    Build Package →
+  </button>
+</div>
+      
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
@@ -667,7 +691,174 @@ export default function App() {
           )}
         </div>
       )}
+{/* BUILD YOUR PACKAGE */}
+{isPackageOpen && (
+  <div
+    style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.45)',
+      zIndex: 2000,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '20px'
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        width: '100%',
+        maxWidth: '550px',
+        maxHeight: '85vh',
+        overflowY: 'auto',
+        borderRadius: '14px',
+        padding: '24px',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '8px'
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            color: '#0f172a',
+            fontSize: '22px'
+          }}
+        >
+          🧩 Build Your Package
+        </h2>
 
+        <button
+          onClick={() => setIsPackageOpen(false)}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            fontSize: '20px',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <p
+        style={{
+          color: '#64748b',
+          fontSize: '14px',
+          marginBottom: '20px'
+        }}
+      >
+        Select the services you need for your project.
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '12px'
+        }}
+      >
+        {categories.map((cat) => {
+          const isSelected = selectedPackageCategories.includes(cat);
+
+          return (
+            <div
+              key={cat}
+              onClick={() => togglePackageCategory(cat)}
+              style={{
+                border: isSelected
+                  ? '2px solid #2563eb'
+                  : '1px solid #cbd5e1',
+                backgroundColor: isSelected
+                  ? '#eff6ff'
+                  : '#ffffff',
+                borderRadius: '10px',
+                padding: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <span style={{ fontSize: '28px' }}>
+                {getCategoryIcon(cat)}
+              </span>
+
+              <div>
+                <div
+                  style={{
+                    fontWeight: '700',
+                    color: '#0f172a',
+                    fontSize: '14px'
+                  }}
+                >
+                  {cat}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '12px',
+                    color: '#64748b',
+                    marginTop: '3px'
+                  }}
+                >
+                  {isSelected ? '✓ Selected' : 'Select service'}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          marginTop: '20px',
+          padding: '12px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          fontSize: '14px',
+          color: '#334155'
+        }}
+      >
+        <strong>{selectedPackageCategories.length}</strong>{' '}
+        service{selectedPackageCategories.length !== 1 ? 's' : ''} selected
+      </div>
+
+      <button
+        onClick={startPackage}
+        style={{
+          width: '100%',
+          marginTop: '16px',
+          padding: '12px',
+          backgroundColor:
+            selectedPackageCategories.length > 0
+              ? '#2563eb'
+              : '#94a3b8',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '7px',
+          fontWeight: '700',
+          fontSize: '15px',
+          cursor:
+            selectedPackageCategories.length > 0
+              ? 'pointer'
+              : 'not-allowed'
+        }}
+        disabled={selectedPackageCategories.length === 0}
+      >
+        Continue → Select Freelancers
+      </button>
+    </div>
+  </div>
+)}
       {/* SLIDE-OVER CART DRAWER */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
