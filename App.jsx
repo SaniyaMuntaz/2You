@@ -757,12 +757,25 @@ export default function App() {
                   <span>Total Estimated Cost:</span>
                   <span>₹{calculateTotal()}</span>
                 </div>
-                <button 
-                  onClick={() => alert('Package Booking Placed Successfully! Service providers notified.')}
-                  style={{ width: '100%', padding: '12px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
-                >
-                  Confirm Package Booking
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    onClick={() => alert('Package Booking Placed Successfully! Service providers notified.')}
+                    style={{ flex: 1, padding: '12px 8px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
+                  >
+                    Confirm Package Booking
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const proposedPrice = prompt(`The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`, calculateTotal());
+                      if (proposedPrice) {
+                        alert(`Negotiation request of ₹${proposedPrice} sent to service providers! They will review in their partner dashboard.`);
+                      }
+                    }}
+                    style={{ flex: 1, padding: '12px 8px', backgroundColor: '#eab308', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
+                  >
+                    Negotiate Price
+                  </button>
+                </div>
               </div>
             )}
           </div>
