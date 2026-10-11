@@ -141,7 +141,7 @@ function FreelancerDashboard({ email, onLogout }) {
   );
 }
 
-// Helper to automatically generate multiple team packages (1 worker per selected category)
+// Helper to automatically generate multiple team packages
 const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
   if (!selectedCategories || selectedCategories.length === 0) return [];
 
@@ -237,12 +237,13 @@ export default function App() {
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [negotiationStatus, setNegotiationStatus] = useState(null);
 
-  // Chat Feature States
+  // Chat Feature States & Auto-reply Simulation
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { sender: 'freelancer', text: 'Hello! I saw your booking/negotiation request. How can I help you today?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
   // Multi-Service Package Page States
   const [isPackagePageOpen, setIsPackagePageOpen] = useState(false);
@@ -251,6 +252,35 @@ export default function App() {
 
   const [lat] = useState(17.4435);
   const [lon] = useState(78.3772);
+
+  // Auto-reply Simulation Logic
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim()) return;
+
+    const userMsg = inputMessage;
+    const newMessages = [...chatMessages, { sender: 'customer', text: userMsg }];
+    setChatMessages(newMessages);
+    setInputMessage('');
+    setIsTyping(true);
+
+    // Dynamic smart responses based on user keywords
+    setTimeout(() => {
+      let replyText = "Thanks for your message! I'm reviewing your request and will confirm shortly.";
+      const lower = userMsg.toLowerCase();
+
+      if (lower.includes('price') || lower.includes('discount') || lower.includes('cost') || lower.includes('rate') || lower.includes('₹')) {
+        replyText = "I can offer a slight discount if we finalize the booking time today! Let's agree on the price.";
+      } else if (lower.includes('time') || lower.includes('when') || lower.includes('today') || lower.includes('tomorrow') || lower.includes('available')) {
+        replyText = "I'm available within 30-45 minutes. What time works best for you?";
+      } else if (lower.includes('location') || lower.includes('address') || lower.includes('where')) {
+        replyText = "I have noted your location. My team is nearby and ready to dispatch.";
+      }
+
+      setChatMessages([...newMessages, { sender: 'freelancer', text: replyText }]);
+      setIsTyping(false);
+    }, 1200);
+  };
 
   const getCategoryIcon = (categoryName) => {
     if (!categoryName) return '🛠️';
@@ -716,8 +746,6 @@ export default function App() {
 
             {cartItems.length > 0 && (
               <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-                
-                {/* NEGOTIATION WITH CHAT BUTTON */}
                 {negotiationStatus === 'pending' && (
                   <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                     <span>⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)</span>
@@ -792,17 +820,14 @@ export default function App() {
                   {msg.text}
                 </div>
               ))}
+              {isTyping && (
+                <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', italic: 'true' }}>
+                  typing response...
+                </div>
+              )}
             </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!inputMessage.trim()) return;
-                setChatMessages([...chatMessages, { sender: 'customer', text: inputMessage }]);
-                setInputMessage('');
-              }}
-              style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}
-            >
+            <form onSubmit={handleSendMessage} style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}>
               <input
                 type="text"
                 placeholder="Type your message..."
@@ -1120,8 +1145,6 @@ export default function App() {
 
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-              
-              {/* NEGOTIATION WITH CHAT BUTTON */}
               {negotiationStatus === 'pending' && (
                 <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                   <span>⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)</span>
@@ -1210,17 +1233,14 @@ export default function App() {
                 {msg.text}
               </div>
             ))}
+            {isTyping && (
+              <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', italic: 'true' }}>
+                typing response...
+              </div>
+            )}
           </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!inputMessage.trim()) return;
-              setChatMessages([...chatMessages, { sender: 'customer', text: inputMessage }]);
-              setInputMessage('');
-            }}
-            style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}
-          >
+          <form onSubmit={handleSendMessage} style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}>
             <input
               type="text"
               placeholder="Type your message..."
