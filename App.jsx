@@ -495,57 +495,98 @@ export default function App() {
           </div>
         )}
 
-        {/* STEP 2: SELECT FREELANCERS PER CATEGORY */}
+       {/* STEP 2: GROUPED NEARBY FREELANCERS PER SELECTED SERVICE */}
         {packageStep === 2 && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', color: '#0f172a', margin: 0 }}>Step 2: Pick Freelancers for your Package</h2>
-                <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>Select a provider for each category in your package:</p>
+                <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Your Package Team</h2>
+                <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
+                  Nearby professionals found within 20 km of Hitec City, Hyderabad:
+                </p>
               </div>
               <button
                 onClick={() => setPackageStep(1)}
                 style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
               >
-                ← Back to Service Selection
+                ← Modify Selected Services
               </button>
             </div>
 
+            {/* Summary Badge */}
+            <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontSize: '20px' }}>⚡</span>
+              <div>
+                <strong style={{ color: '#1e40af', fontSize: '15px' }}>Combined Service Package ({selectedPackageCategories.length} Services)</strong>
+                <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#3b82f6' }}>
+                  {selectedPackageCategories.join(' • ')}
+                </p>
+              </div>
+            </div>
+
+            {/* Grouped Service Sections */}
             {selectedPackageCategories.map((cat) => {
               const categoryWorkers = workers.filter(w => w.category?.toLowerCase() === cat.toLowerCase());
+              
               return (
-                <div key={cat} style={{ marginBottom: '28px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                  <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>{getCategoryIcon(cat)}</span> {cat} Professionals
-                  </h3>
+                <div key={cat} style={{ marginBottom: '28px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                    <h3 style={{ margin: 0, fontSize: '18px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{getCategoryIcon(cat)}</span> {cat} Providers
+                    </h3>
+                    <span style={{ fontSize: '12px', backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '12px', fontWeight: '600' }}>
+                      {categoryWorkers.length} nearby found
+                    </span>
+                  </div>
 
                   {categoryWorkers.length === 0 ? (
-                    <p style={{ color: '#64748b', fontSize: '14px' }}>No professionals available for this category near you.</p>
+                    <p style={{ color: '#64748b', fontSize: '14px', fontStyle: 'italic', padding: '10px 0' }}>
+                      No verified {cat} professionals available near your current location.
+                    </p>
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
                       {categoryWorkers.map((worker) => {
                         const isInCart = cartItems.some(item => item.worker_id === worker.worker_id);
                         return (
-                          <div key={worker.worker_id} style={{ border: '1px solid #cbd5e1', padding: '14px', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
-                            <h4 style={{ margin: '0 0 4px 0', color: '#0f172a' }}>{worker.name}</h4>
-                            <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#475569' }}>📍 {worker.address}</p>
-                            <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#2563eb', fontWeight: 'bold' }}>₹{worker.hourly_rate || 350}/hr</p>
-                            
+                          <div 
+                            key={worker.worker_id} 
+                            style={{ 
+                              border: isInCart ? '2px solid #16a34a' : '1px solid #cbd5e1', 
+                              padding: '16px', 
+                              borderRadius: '10px', 
+                              backgroundColor: isInCart ? '#f0fdf4' : '#f8fafc',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between'
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
+                                <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>⭐ {worker.google_rating || '4.5'}</span>
+                              </div>
+                              <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#475569' }}>📍 {worker.address}</p>
+                              <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#2563eb', fontWeight: 'bold' }}>
+                                ₹{worker.hourly_rate || 350}/hr
+                              </p>
+                            </div>
+
                             <button
                               onClick={() => addToCart(worker)}
                               style={{
                                 width: '100%',
-                                padding: '8px',
+                                padding: '10px',
                                 borderRadius: '6px',
                                 border: 'none',
                                 backgroundColor: isInCart ? '#16a34a' : '#2563eb',
                                 color: '#ffffff',
                                 fontWeight: '600',
                                 fontSize: '13px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                transition: 'background-color 0.2s'
                               }}
                             >
-                              {isInCart ? '✓ Added to Package' : '+ Add to Package'}
+                              {isInCart ? '✓ Selected for Package' : '+ Add to Package Group'}
                             </button>
                           </div>
                         );
@@ -556,12 +597,19 @@ export default function App() {
               );
             })}
 
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            {/* Bottom Floating Action Bar */}
+            <div style={{ position: 'sticky', bottom: '20px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
+              <div>
+                <span style={{ fontSize: '14px', color: '#64748b' }}>Package Team Members:</span>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>
+                  {cartItems.length} / {selectedPackageCategories.length} Roles Filled
+                </div>
+              </div>
               <button
                 onClick={() => setIsCartOpen(true)}
-                style={{ padding: '14px 32px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+                style={{ padding: '14px 28px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
               >
-                Review Package & Book ({cartItems.length} items)
+                Review Package & Book Team →
               </button>
             </div>
           </div>
