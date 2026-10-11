@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 function FreelancerDashboard({ email, onLogout }) {
   const [activeTab, setActiveTab] = useState('profile');
-  const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [skills, setSkills] = useState('Plumbing, Tap Repair, Pipe Fitting');
   const [experience, setExperience] = useState('4 years of experience in residential plumbing and maintenance.');
   const [workingEvidence, setWorkingEvidence] = useState('https://drive.google.com/portfolio-sample');
@@ -262,12 +261,13 @@ export default function App() {
 
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [negotiatedPrice, setNegotiatedPrice] = useState(null);
 
   // Multi-Service Package Page States
   const [isPackagePageOpen, setIsPackagePageOpen] = useState(false);
   const [packageStep, setPackageStep] = useState(1); // Step 1: Select Categories, Step 2: Pick Freelancers
   const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
-
+  
   const [lat] = useState(17.4435);
   const [lon] = useState(78.3772);
 
