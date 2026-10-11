@@ -1046,6 +1046,7 @@ export default function App() {
       )}
 
      {/* SLIDE-OVER CART DRAWER */}
+      {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
@@ -1082,7 +1083,6 @@ export default function App() {
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
               
-              {/* DISPLAY NEGOTIATION STATUS BADGE */}
               {negotiatedPrice !== null && (
                 <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
                   🤝 Requested for ₹{negotiatedPrice}
@@ -1120,3 +1120,6 @@ export default function App() {
           )}
         </div>
       )}
+    </div>
+  );
+}
