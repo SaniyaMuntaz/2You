@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // ==========================================
-// 1. FREELANCER DASHBOARD COMPONENT (Flowchart)
+// 1. FREELANCER DASHBOARD COMPONENT
 // ==========================================
 function FreelancerDashboard({ email, onLogout }) {
   const [activeTab, setActiveTab] = useState('profile');
@@ -140,34 +140,11 @@ function FreelancerDashboard({ email, onLogout }) {
     </div>
   );
 }
-// Helper to automatically generate a unified package group with 1 worker per role
-const generatePackageGroups = (selectedCategories, allWorkers) => {
-  const selectedTeam = [];
 
-  selectedCategories.forEach((cat) => {
-    // Find all nearby workers for this category
-    const categoryMatches = allWorkers.filter(
-      (w) => w.category?.toLowerCase() === cat.toLowerCase()
-    );
-
-    if (categoryMatches.length > 0) {
-      // Pick the top-rated worker (or first nearby worker) for this role
-      const topWorker = [...categoryMatches].sort(
-        (a, b) => (b.google_rating || 0) - (a.google_rating || 0)
-      )[0];
-
-      selectedTeam.push(topWorker);
-    }
-  });
-
-  return selectedTeam;
-};
 // Helper to automatically generate multiple team packages (1 worker per selected category)
-// Helper to dynamically generate labeled teams + all possible standard teams
 const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
   if (!selectedCategories || selectedCategories.length === 0) return [];
 
-  // Group workers by selected category
   const workersByCategory = {};
   selectedCategories.forEach((cat) => {
     workersByCategory[cat] = allWorkers.filter(
@@ -175,7 +152,6 @@ const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
     );
   });
 
-  // Check the max number of full teams we can construct across categories
   const maxPossibleTeams = Math.max(
     ...selectedCategories.map((cat) => (workersByCategory[cat] || []).length)
   );
@@ -184,19 +160,16 @@ const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
 
   const teams = [];
 
-  // Build teams index by index so no worker is wasted
   for (let i = 0; i < maxPossibleTeams; i++) {
     const teamMembers = selectedCategories
       .map((cat) => {
         const matches = workersByCategory[cat] || [];
-        // Fall back to the last available worker if a category has fewer freelancers
         return matches[i] || matches[matches.length - 1];
       })
       .filter(Boolean);
 
     if (teamMembers.length === 0) continue;
 
-    // Define special labels for the first 3 teams, and standard labels for the rest
     if (i === 0) {
       teams.push({
         id: `team-${i + 1}`,
@@ -228,7 +201,6 @@ const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
         members: teamMembers
       });
     } else {
-      // Normal / Standard Teams
       teams.push({
         id: `team-${i + 1}`,
         name: `👥 Standard Package Team ${i + 1}`,
@@ -243,6 +215,7 @@ const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
 
   return teams;
 };
+
 // ==========================================
 // 2. MAIN APP COMPONENT
 // ==========================================
@@ -262,16 +235,25 @@ export default function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
-  const [negotiationStatus, setNegotiationStatus] = useState(null); // null | 'pending' | 'accepted'
+  const [negotiationStatus, setNegotiationStatus] = useState(null);
+
+  // Chat Feature States
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'freelancer', text: 'Hello! I saw your booking/negotiation request. How can I help you today?' }
+  ]);
+  const [inputMessage, setInputMessage] = useState('');
+
   // Multi-Service Package Page States
   const [isPackagePageOpen, setIsPackagePageOpen] = useState(false);
-  const [packageStep, setPackageStep] = useState(1); // Step 1: Select Categories, Step 2: Pick Freelancers
+  const [packageStep, setPackageStep] = useState(1);
   const [selectedPackageCategories, setSelectedPackageCategories] = useState([]);
-  
+
   const [lat] = useState(17.4435);
   const [lon] = useState(78.3772);
 
   const getCategoryIcon = (categoryName) => {
+    if (!categoryName) return '🛠️';
     const name = categoryName.toLowerCase();
     if (name.includes('makeup')) return '💄';
     if (name.includes('beautician') || name.includes('beauty')) return '💅';
@@ -283,7 +265,7 @@ export default function App() {
     if (name.includes('cleaner')) return '🧹';
     if (name.includes('gardener')) return '🪴';
     if (name.includes('driver')) return '🚗';
-    if (name.includes('ac')) return '❄️️';
+    if (name.includes('ac')) return '❄';
     if (name.includes('cook')) return '🍳';
     if (name.includes('mechanic')) return '⚙️';
     if (name.includes('tailor')) return '🧵';
@@ -311,8 +293,7 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
- const getPortfolioImages = (worker) => {
-    // Check all potential image keys from your MongoDB / FastAPI dataset
+  const getPortfolioImages = (worker) => {
     const rawImages = worker.portfolio_image_urls || worker.portfolio_images || worker.images || worker.working_evidence;
     if (!rawImages) return [];
 
@@ -339,7 +320,6 @@ export default function App() {
       .filter(url => typeof url === 'string' && url.trim() !== '')
       .map(url => {
         const cleanUrl = url.trim();
-        // Automatically convert Google Drive view links into direct viewable image URLs
         if (cleanUrl.includes('drive.google.com/file/d/')) {
           const fileId = cleanUrl.split('/d/')[1]?.split('/')[0];
           if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
@@ -355,7 +335,7 @@ export default function App() {
       const res = await fetch(url);
       const data = await res.json();
       const fetchedWorkers = data.workers || [];
-      
+
       setWorkers(fetchedWorkers);
 
       const uniqueCategories = [...new Set(
@@ -363,7 +343,7 @@ export default function App() {
           .map((w) => w.category)
           .filter((cat) => cat && cat.trim() !== '')
       )];
-      
+
       setCategories(uniqueCategories);
     } catch (err) {
       console.error("Error connecting to FastAPI backend:", err);
@@ -434,9 +414,7 @@ export default function App() {
     return matchesCategory && matchesSearch;
   });
 
-  // ----------------------------------------------------
   // FEATURE 1: LOGIN PAGE
-  // ----------------------------------------------------
   if (!isLoggedIn) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f1f5f9', fontFamily: 'Segoe UI, sans-serif' }}>
@@ -448,36 +426,14 @@ export default function App() {
             <button
               type="button"
               onClick={() => { setRole('customer'); setLoginError(''); }}
-              style={{
-                flex: 1,
-                padding: '8px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '13px',
-                backgroundColor: role === 'customer' ? '#ffffff' : 'transparent',
-                color: role === 'customer' ? '#2563eb' : '#64748b',
-                boxShadow: role === 'customer' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'
-              }}
+              style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '13px', backgroundColor: role === 'customer' ? '#ffffff' : 'transparent', color: role === 'customer' ? '#2563eb' : '#64748b', boxShadow: role === 'customer' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none' }}
             >
               👤 Customer
             </button>
             <button
               type="button"
               onClick={() => { setRole('freelancer'); setLoginError(''); }}
-              style={{
-                flex: 1,
-                padding: '8px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '13px',
-                backgroundColor: role === 'freelancer' ? '#ffffff' : 'transparent',
-                color: role === 'freelancer' ? '#2563eb' : '#64748b',
-                boxShadow: role === 'freelancer' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'
-              }}
+              style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '13px', backgroundColor: role === 'freelancer' ? '#ffffff' : 'transparent', color: role === 'freelancer' ? '#2563eb' : '#64748b', boxShadow: role === 'freelancer' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none' }}
             >
               🛠️ Freelancer
             </button>
@@ -521,20 +477,15 @@ export default function App() {
     );
   }
 
-  // ----------------------------------------------------
   // ROUTING BASED ON ROLE
-  // ----------------------------------------------------
   if (role === 'freelancer') {
     return <FreelancerDashboard email={email} onLogout={() => { setIsLoggedIn(false); setEmail(''); setPassword(''); }} />;
   }
 
-  // ----------------------------------------------------
   // FEATURE 3: DEDICATED MULTI-SERVICE PACKAGE PAGE
-  // ----------------------------------------------------
   if (isPackagePageOpen) {
     return (
-      <div style={{ fontFamily: 'Segoe UI, sans-serif', padding: '24px', maxWidth: '1100px', margin: '0 auto', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-        {/* Header */}
+      <div style={{ fontFamily: 'Segoe UI, sans-serif', padding: '24px', maxWidth: '1100px', margin: '0 auto', backgroundColor: '#f8fafc', minHeight: '100vh', position: 'relative' }}>
         <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' }}>
           <div>
             <h1 style={{ margin: '0 0 4px 0', color: '#2563eb', fontSize: '30px', fontWeight: '800' }}>🧩 Build Your Service Package</h1>
@@ -556,7 +507,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* STEP 1: SELECT CATEGORIES */}
         {packageStep === 1 && (
           <div>
             <h2 style={{ fontSize: '20px', color: '#0f172a', marginBottom: '8px' }}>Step 1: Choose the services you need</h2>
@@ -617,7 +567,6 @@ export default function App() {
           </div>
         )}
 
-    {/* STEP 2: DYNAMIC MULTI-TEAM SELECTION VIEW */}
         {packageStep === 2 && (() => {
           const generatedTeams = generateMultiplePackageTeams(selectedPackageCategories, workers);
 
@@ -628,11 +577,9 @@ export default function App() {
               teamMembers.forEach((worker) => {
                 const exists = updatedCart.find((item) => item.worker_id === worker.worker_id);
                 if (exists) {
-                  // Increment hours if worker is already in cart
                   const idx = updatedCart.findIndex((item) => item.worker_id === worker.worker_id);
                   updatedCart[idx] = { ...updatedCart[idx], hours: updatedCart[idx].hours + 1 };
                 } else {
-                  // Add worker to cart
                   const rate = worker.hourly_rate || 350;
                   updatedCart.push({ ...worker, hours: 1, rate });
                 }
@@ -660,7 +607,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* RENDER ALL GENERATED TEAMS */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {generatedTeams.map((team) => {
                   const teamTotal = team.members.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
@@ -694,7 +640,6 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* TEAM MEMBERS GRID */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
                         {team.members.map((worker, idx) => (
                           <div key={`${worker.worker_id}-${idx}`} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
@@ -711,7 +656,6 @@ export default function App() {
                         ))}
                       </div>
 
-                      {/* TEAM SELECTION BUTTON */}
                       <button
                         onClick={() => selectTeamForCart(team.members)}
                         style={{
@@ -727,7 +671,7 @@ export default function App() {
                         }}
                       >
                         {isTeamInCart ? '✓ Team Selected in Booking Cart' : `🤝 Select ${team.name} (₹${teamTotal}/hr)`}
-</button>
+                      </button>
                     </div>
                   );
                 })}
@@ -735,7 +679,8 @@ export default function App() {
             </div>
           );
         })()}
-        {/* SLIDE-OVER CART DRAWER */}
+
+        {/* SLIDE-OVER CART DRAWER (PACKAGE VIEW) */}
         {isCartOpen && (
           <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
@@ -771,6 +716,26 @@ export default function App() {
 
             {cartItems.length > 0 && (
               <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                
+                {/* NEGOTIATION WITH CHAT BUTTON */}
+                {negotiationStatus === 'pending' && (
+                  <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                    <span>⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)</span>
+                    <button
+                      onClick={() => setIsChatOpen(true)}
+                      style={{ padding: '6px 12px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      💬 Chat
+                    </button>
+                  </div>
+                )}
+
+                {negotiationStatus === 'accepted' && (
+                  <div style={{ backgroundColor: '#dcfce7', border: '1px solid #86efac', color: '#166534', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
+                    🎉 Negotiated for ₹{negotiatedPrice}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
                   <span>Total Estimated Cost:</span>
                   <span>₹{calculateTotal()}</span>
@@ -785,26 +750,77 @@ export default function App() {
                   <button 
                     onClick={() => {
                       const proposedPrice = prompt(`The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`, calculateTotal());
-                      if (proposedPrice) {
-                        alert(`Negotiation request of ₹${proposedPrice} sent to service providers! They will review in their partner dashboard.`);
+                      if (proposedPrice && !isNaN(proposedPrice)) {
+                        setNegotiatedPrice(proposedPrice);
+                        setNegotiationStatus('pending');
                       }
                     }}
                     style={{ flex: 1, padding: '12px 8px', backgroundColor: '#eab308', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
                   >
-                    Negotiate Price
+                    {negotiationStatus === 'pending' ? 'Update Offer' : 'Negotiate Price'}
                   </button>
                 </div>
               </div>
             )}
           </div>
         )}
+
+        {/* CHAT POPUP DRAWER (PACKAGE VIEW) */}
+        {isChatOpen && (
+          <div style={{ position: 'fixed', bottom: '20px', right: '400px', width: '320px', height: '420px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', zIndex: 1100, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '12px 16px', backgroundColor: '#2563eb', color: '#ffffff', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 'bold', fontSize: '14px' }}>💬 Chat with Service Provider</span>
+              <button onClick={() => setIsChatOpen(false)} style={{ border: 'none', background: 'transparent', color: '#ffffff', fontSize: '16px', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <div style={{ flex: 1, padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#f8fafc' }}>
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    alignSelf: msg.sender === 'customer' ? 'flex-end' : 'flex-start',
+                    backgroundColor: msg.sender === 'customer' ? '#2563eb' : '#ffffff',
+                    color: msg.sender === 'customer' ? '#ffffff' : '#0f172a',
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    maxWidth: '80%',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    border: msg.sender === 'customer' ? 'none' : '1px solid #e2e8f0'
+                  }}
+                >
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!inputMessage.trim()) return;
+                setChatMessages([...chatMessages, { sender: 'customer', text: inputMessage }]);
+                setInputMessage('');
+              }}
+              style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}
+            >
+              <input
+                type="text"
+                placeholder="Type your message..."
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                style={{ flex: 1, padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }}
+              />
+              <button type="submit" style={{ padding: '8px 12px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>
+                Send
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     );
   }
 
-  // ----------------------------------------------------
   // FEATURE 2: CUSTOMER MARKETPLACE VIEW
-  // ----------------------------------------------------
   return (
     <div style={{ fontFamily: 'Segoe UI, sans-serif', padding: '24px', maxWidth: '1100px', margin: '0 auto', backgroundColor: '#f8fafc', minHeight: '100vh', position: 'relative' }}>
       
@@ -889,7 +905,7 @@ export default function App() {
         />
       </div>
 
-      {/* MULTI-SERVICE PACKAGE BANNER (ONLY SHOWN ON HOME SERVICE GRID VIEW) */}
+      {/* MULTI-SERVICE PACKAGE BANNER */}
       {!selectedCategory && (
         <div
           onClick={() => {
@@ -904,11 +920,11 @@ export default function App() {
             padding: '16px 20px',
             marginBottom: '28px',
             display: 'flex',
-            justifyContent: 'space-between', /* FIXED: changed from 'justify' to 'justifyContent' */
+            justifyContent: 'space-between',
             alignItems: 'center',
             cursor: 'pointer',
             boxShadow: '0 2px 4px rgba(37,99,235,0.08)',
-            gap: '16px' /* ADDED: creates guaranteed spacing between text and button */
+            gap: '16px'
           }}
         >
           <div>
@@ -936,14 +952,15 @@ export default function App() {
               fontWeight: '600',
               fontSize: '14px',
               cursor: 'pointer',
-              whiteSpace: 'nowrap', /* ADDED: prevents button text from breaking into two lines */
-              flexShrink: 0        /* ADDED: prevents button from getting squished */
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             Build Package →
           </button>
         </div>
       )}
+
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
       ) : !selectedCategory ? (
@@ -1040,7 +1057,7 @@ export default function App() {
                           ))}
                         </div>
                       )}
-                    </div> {/* <--- Added this closing div tag for the inner details wrapper */}
+                    </div>
 
                     <button
                       onClick={() => addToCart(worker)}
@@ -1066,7 +1083,8 @@ export default function App() {
           )}
         </div>
       )}
-    {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
+
+      {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
@@ -1103,10 +1121,16 @@ export default function App() {
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
               
-              {/* DYNAMIC NEGOTIATION BADGES */}
+              {/* NEGOTIATION WITH CHAT BUTTON */}
               {negotiationStatus === 'pending' && (
-                <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
-                  ⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)
+                <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                  <span>⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)</span>
+                  <button
+                    onClick={() => setIsChatOpen(true)}
+                    style={{ padding: '6px 12px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    💬 Chat
+                  </button>
                 </div>
               )}
 
@@ -1156,6 +1180,58 @@ export default function App() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* CHAT POPUP DRAWER (MARKETPLACE VIEW) */}
+      {isChatOpen && (
+        <div style={{ position: 'fixed', bottom: '20px', right: '400px', width: '320px', height: '420px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', zIndex: 1100, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '12px 16px', backgroundColor: '#2563eb', color: '#ffffff', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>💬 Chat with Service Provider</span>
+            <button onClick={() => setIsChatOpen(false)} style={{ border: 'none', background: 'transparent', color: '#ffffff', fontSize: '16px', cursor: 'pointer' }}>✕</button>
+          </div>
+
+          <div style={{ flex: 1, padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#f8fafc' }}>
+            {chatMessages.map((msg, idx) => (
+              <div
+                key={idx}
+                style={{
+                  alignSelf: msg.sender === 'customer' ? 'flex-end' : 'flex-start',
+                  backgroundColor: msg.sender === 'customer' ? '#2563eb' : '#ffffff',
+                  color: msg.sender === 'customer' ? '#ffffff' : '#0f172a',
+                  padding: '8px 12px',
+                  borderRadius: '12px',
+                  fontSize: '13px',
+                  maxWidth: '80%',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                  border: msg.sender === 'customer' ? 'none' : '1px solid #e2e8f0'
+                }}
+              >
+                {msg.text}
+              </div>
+            ))}
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!inputMessage.trim()) return;
+              setChatMessages([...chatMessages, { sender: 'customer', text: inputMessage }]);
+              setInputMessage('');
+            }}
+            style={{ padding: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '6px' }}
+          >
+            <input
+              type="text"
+              placeholder="Type your message..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              style={{ flex: 1, padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }}
+            />
+            <button type="submit" style={{ padding: '8px 12px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>
+              Send
+            </button>
+          </form>
         </div>
       )}
     </div>
