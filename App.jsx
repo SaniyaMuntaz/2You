@@ -262,7 +262,7 @@ export default function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
-
+  const [negotiationStatus, setNegotiationStatus] = useState(null); // null | 'pending' | 'accepted'
   // Multi-Service Package Page States
   const [isPackagePageOpen, setIsPackagePageOpen] = useState(false);
   const [packageStep, setPackageStep] = useState(1); // Step 1: Select Categories, Step 2: Pick Freelancers
@@ -1045,7 +1045,7 @@ export default function App() {
         </div>
       )}
 
-      {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
+     {/* SLIDE-OVER CART DRAWER */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
@@ -1081,22 +1081,41 @@ export default function App() {
 
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-              {negotiatedPrice !== null && (
-                <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
-                  🤝 Requested for ₹{negotiatedPrice}
+              
+              {/* DYNAMIC NEGOTIATION BADGES */}
+              {negotiationStatus === 'pending' && (
+                <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
+                  ⏳ Negotiation requested for ₹{negotiatedPrice} (Awaiting partner confirmation)
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
+              {negotiationStatus === 'accepted' && (
+                <div style={{ backgroundColor: '#dcfce7', border: '1px solid #86efac', color: '#166534', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
+                  🎉 Negotiated for ₹{negotiatedPrice}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
                 <span>Total Estimated Cost:</span>
-                <span style={{ textDecoration: negotiatedPrice ? 'line-through' : 'none', color: negotiatedPrice ? '#94a3b8' : '#0f172a' }}>
-                  ₹{calculateTotal()}
-                </span>
+                <div style={{ textAlign: 'right' }}>
+                  {negotiationStatus === 'accepted' ? (
+                    <div>
+                      <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '13px', marginRight: '6px' }}>
+                        ₹{calculateTotal()}
+                      </span>
+                      <span style={{ color: '#16a34a', fontSize: '18px', fontWeight: '800' }}>
+                        ₹{negotiatedPrice}
+                      </span>
+                    </div>
+                  ) : (
+                    <span>₹{calculateTotal()}</span>
+                  )}
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button 
-                  onClick={() => alert(`Order Placed Successfully for ${negotiatedPrice ? `₹${negotiatedPrice}` : `₹${calculateTotal()}`}! Service providers notified.`)}
+                  onClick={() => alert(`Order Placed Successfully for ${negotiationStatus === 'accepted' ? `₹${negotiatedPrice}` : `₹${calculateTotal()}`}! Service providers notified.`)}
                   style={{ flex: 1, padding: '12px 8px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
                 >
                   Confirm Booking
@@ -1106,18 +1125,15 @@ export default function App() {
                     const proposedPrice = prompt(`The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`, calculateTotal());
                     if (proposedPrice && !isNaN(proposedPrice)) {
                       setNegotiatedPrice(proposedPrice);
-                      alert(`Negotiation request of ₹${proposedPrice} sent to service providers! They will review in their partner dashboard.`);
+                      setNegotiationStatus('pending');
                     }
                   }}
                   style={{ flex: 1, padding: '12px 8px', backgroundColor: '#eab308', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
                 >
-                  Negotiate Price
+                  {negotiationStatus === 'pending' ? 'Update Offer' : 'Negotiate Price'}
                 </button>
               </div>
             </div>
           )}
         </div>
       )}
-    </div>
-  );
-}
