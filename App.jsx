@@ -1081,7 +1081,6 @@ export default function App() {
 
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-              
               {negotiatedPrice !== null && (
                 <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
                   🤝 Requested for ₹{negotiatedPrice}
@@ -1115,7 +1114,6 @@ export default function App() {
                   Negotiate Price
                 </button>
               </div>
-              )}
             </div>
           )}
         </div>
