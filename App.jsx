@@ -735,6 +735,7 @@ export default function App() {
             </div>
           );
         })()}
+      </div>
         {/* SLIDE-OVER CART DRAWER */}
         {isCartOpen && (
           <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
