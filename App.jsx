@@ -352,10 +352,18 @@ export default function App() {
       .filter(url => typeof url === 'string' && url.trim() !== '')
       .map(url => {
         const cleanUrl = url.trim();
+        
+        // 1. Google Drive direct link conversion
         if (cleanUrl.includes('drive.google.com/file/d/')) {
           const fileId = cleanUrl.split('/d/')[1]?.split('/')[0];
           if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
+
+        // 2. Wrap third-party URLs (Magicpin, etc.) in a proxy to bypass hotlink blocking
+        if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+          return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}`;
+        }
+
         return cleanUrl;
       });
   };
@@ -1125,7 +1133,7 @@ export default function App() {
         </div>
       )}
 
-      {/* PORTFOLIO MODAL DIALOG */}
+     {/* PORTFOLIO MODAL DIALOG */}
       {activePortfolioWorker && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.65)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '600px', width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative' }}>
@@ -1148,6 +1156,7 @@ export default function App() {
                       key={idx} 
                       src={imgUrl} 
                       alt={`Work sample ${idx + 1}`}
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.target.onerror = null; 
                         e.target.src = "https://via.placeholder.com/200x150?text=Work+Sample";
