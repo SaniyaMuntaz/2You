@@ -1024,7 +1024,7 @@ export default function App() {
                         <span>Trust Score: <strong>{worker.trust_score}</strong></span>
                       </div>
 
-                     {images.length > 0 && (
+                      {images.length > 0 && (
                         <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '12px' }}>
                           {images.map((imgUrl, idx) => (
                             <img 
@@ -1040,8 +1040,9 @@ export default function App() {
                           ))}
                         </div>
                       )}
+                    </div> {/* <--- Added this closing div tag for the inner details wrapper */}
 
-                      <button
+                    <button
                       onClick={() => addToCart(worker)}
                       style={{
                         width: '100%',
@@ -1065,7 +1066,6 @@ export default function App() {
           )}
         </div>
       )}
-
     {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
