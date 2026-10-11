@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 function FreelancerDashboard({ email, onLogout }) {
   const [activeTab, setActiveTab] = useState('profile');
-
+  const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [skills, setSkills] = useState('Plumbing, Tap Repair, Pipe Fitting');
   const [experience, setExperience] = useState('4 years of experience in residential plumbing and maintenance.');
   const [workingEvidence, setWorkingEvidence] = useState('https://drive.google.com/portfolio-sample');
@@ -1045,7 +1045,7 @@ export default function App() {
         </div>
       )}
 
-      {/* SLIDE-OVER CART DRAWER */}
+     {/* SLIDE-OVER CART DRAWER */}
       {isCartOpen && (
         <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
@@ -1057,7 +1057,7 @@ export default function App() {
             {cartItems.length === 0 ? (
               <p style={{ color: '#64748b', textAlign: 'center', marginTop: '40px' }}>Your cart is empty. Select professionals from any service category to book!</p>
             ) : (
-              <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
+              <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' }}>
                 {cartItems.map((item) => (
                   <div key={item.worker_id} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px', color: '#0f172a' }}>
@@ -1081,13 +1081,24 @@ export default function App() {
 
           {cartItems.length > 0 && (
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+              
+              {/* DISPLAY NEGOTIATION STATUS BADGE */}
+              {negotiatedPrice !== null && (
+                <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textAlign: 'center' }}>
+                  🤝 Requested for ₹{negotiatedPrice}
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
                 <span>Total Estimated Cost:</span>
-                <span>₹{calculateTotal()}</span>
+                <span style={{ textDecoration: negotiatedPrice ? 'line-through' : 'none', color: negotiatedPrice ? '#94a3b8' : '#0f172a' }}>
+                  ₹{calculateTotal()}
+                </span>
               </div>
+
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button 
-                  onClick={() => alert('Order Placed Successfully! Service providers notified.')}
+                  onClick={() => alert(`Order Placed Successfully for ${negotiatedPrice ? `₹${negotiatedPrice}` : `₹${calculateTotal()}`}! Service providers notified.`)}
                   style={{ flex: 1, padding: '12px 8px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
                 >
                   Confirm Booking
@@ -1095,7 +1106,8 @@ export default function App() {
                 <button 
                   onClick={() => {
                     const proposedPrice = prompt(`The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`, calculateTotal());
-                    if (proposedPrice) {
+                    if (proposedPrice && !isNaN(proposedPrice)) {
+                      setNegotiatedPrice(proposedPrice);
                       alert(`Negotiation request of ₹${proposedPrice} sent to service providers! They will review in their partner dashboard.`);
                     }
                   }}
@@ -1108,6 +1120,3 @@ export default function App() {
           )}
         </div>
       )}
-    </div>
-  );
-}
