@@ -164,10 +164,11 @@ const generatePackageGroups = (selectedCategories, allWorkers) => {
   return selectedTeam;
 };
 // Helper to automatically generate multiple team packages (1 worker per selected category)
+// Helper to dynamically generate labeled teams + all possible standard teams
 const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
-  if (selectedCategories.length === 0) return [];
+  if (!selectedCategories || selectedCategories.length === 0) return [];
 
-  // Group nearby workers by category
+  // Group workers by selected category
   const workersByCategory = {};
   selectedCategories.forEach((cat) => {
     workersByCategory[cat] = allWorkers.filter(
@@ -175,57 +176,73 @@ const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
     );
   });
 
-  // Team 1: Top Rated Professionals
-  const topRatedTeam = selectedCategories.map((cat) => {
-    const matches = workersByCategory[cat] || [];
-    return [...matches].sort((a, b) => (b.google_rating || 0) - (a.google_rating || 0))[0];
-  }).filter(Boolean);
+  // Check the max number of full teams we can construct across categories
+  const maxPossibleTeams = Math.max(
+    ...selectedCategories.map((cat) => (workersByCategory[cat] || []).length)
+  );
 
-  // Team 2: Best Value / Budget Team
-  const budgetTeam = selectedCategories.map((cat) => {
-    const matches = workersByCategory[cat] || [];
-    return [...matches].sort((a, b) => (a.hourly_rate || 350) - (b.hourly_rate || 350))[0];
-  }).filter(Boolean);
+  if (maxPossibleTeams === 0) return [];
 
-  // Team 3: Alternative Balanced Team
-  const balancedTeam = selectedCategories.map((cat) => {
-    const matches = workersByCategory[cat] || [];
-    // Picks second available or falls back to first
-    return matches[1] || matches[0];
-  }).filter(Boolean);
+  const teams = [];
 
-  const teams = [
-    {
-      id: 'top-rated',
-      name: '⭐ Top Rated Team',
-      badge: 'HIGHEST TRUST SCORE',
-      badgeBg: '#fef3c7',
-      badgeColor: '#92400e',
-      borderColor: '#f59e0b',
-      members: topRatedTeam
-    },
-    {
-      id: 'budget',
-      name: '💰 Best Value Team',
-      badge: 'BUDGET FRIENDLY',
-      badgeBg: '#dcfce7',
-      badgeColor: '#166534',
-      borderColor: '#16a34a',
-      members: budgetTeam
-    },
-    {
-      id: 'balanced',
-      name: '⚡ Fast Response Team',
-      badge: 'POPULAR CHOICE',
-      badgeBg: '#dbeafe',
-      badgeColor: '#1e40af',
-      borderColor: '#2563eb',
-      members: balancedTeam
+  // Build teams index by index so no worker is wasted
+  for (let i = 0; i < maxPossibleTeams; i++) {
+    const teamMembers = selectedCategories
+      .map((cat) => {
+        const matches = workersByCategory[cat] || [];
+        // Fall back to the last available worker if a category has fewer freelancers
+        return matches[i] || matches[matches.length - 1];
+      })
+      .filter(Boolean);
+
+    if (teamMembers.length === 0) continue;
+
+    // Define special labels for the first 3 teams, and standard labels for the rest
+    if (i === 0) {
+      teams.push({
+        id: `team-${i + 1}`,
+        name: '⭐ Top Rated Team',
+        badge: 'HIGHEST TRUST SCORE',
+        badgeBg: '#fef3c7',
+        badgeColor: '#92400e',
+        borderColor: '#f59e0b',
+        members: teamMembers
+      });
+    } else if (i === 1) {
+      teams.push({
+        id: `team-${i + 1}`,
+        name: '💰 Best Value Team',
+        badge: 'BUDGET FRIENDLY',
+        badgeBg: '#dcfce7',
+        badgeColor: '#166534',
+        borderColor: '#16a34a',
+        members: teamMembers
+      });
+    } else if (i === 2) {
+      teams.push({
+        id: `team-${i + 1}`,
+        name: '⚡ Fast Response Team',
+        badge: 'POPULAR CHOICE',
+        badgeBg: '#dbeafe',
+        badgeColor: '#1e40af',
+        borderColor: '#2563eb',
+        members: teamMembers
+      });
+    } else {
+      // Normal / Standard Teams
+      teams.push({
+        id: `team-${i + 1}`,
+        name: `👥 Standard Package Team ${i + 1}`,
+        badge: 'AVAILABLE TEAM',
+        badgeBg: '#f1f5f9',
+        badgeColor: '#475569',
+        borderColor: '#cbd5e1',
+        members: teamMembers
+      });
     }
-  ];
+  }
 
-  // Return teams that have at least one member matched
-  return teams.filter((t) => t.members.length > 0);
+  return teams;
 };
 // ==========================================
 // 2. MAIN APP COMPONENT
@@ -580,7 +597,7 @@ export default function App() {
           </div>
         )}
 
-     {/* STEP 2: MULTI-TEAM SELECTION VIEW */}
+    {/* STEP 2: DYNAMIC MULTI-TEAM SELECTION VIEW */}
         {packageStep === 2 && (() => {
           const generatedTeams = generateMultiplePackageTeams(selectedPackageCategories, workers);
 
@@ -599,7 +616,7 @@ export default function App() {
                 <div>
                   <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Choose Your Package Team</h2>
                   <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
-                    Select from auto-assembled teams of nearby professionals matching your roles:
+                    {generatedTeams.length} available team combination{generatedTeams.length > 1 ? 's' : ''} assembled from nearby freelancers:
                   </p>
                 </div>
                 <button
@@ -610,7 +627,7 @@ export default function App() {
                 </button>
               </div>
 
-              {/* RENDER EACH GENERATED TEAM CARD */}
+              {/* RENDER ALL GENERATED TEAMS */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {generatedTeams.map((team) => {
                   const teamTotal = team.members.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
@@ -644,10 +661,10 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* TEAM MEMBERS LIST */}
+                      {/* TEAM MEMBERS GRID */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                        {team.members.map((worker) => (
-                          <div key={worker.worker_id} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
+                        {team.members.map((worker, idx) => (
+                          <div key={`${worker.worker_id}-${idx}`} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
                             <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
                               {getCategoryIcon(worker.category)} {worker.category}
                             </div>
