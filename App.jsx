@@ -1042,30 +1042,26 @@ export default function App() {
                         </div>
                       )}
 
-                    <button
-                      onClick={() => addToCart(worker)}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        backgroundColor: isInCart ? '#16a34a' : '#2563eb',
-                        color: '#ffffff',
-                        fontWeight: '600',
-                        fontSize: '14px',
-                        cursor: 'pointer',
-                        marginTop: '8px'
-                      }}
-                    >
-                      {isInCart ? '✓ Service Selected (Add More)' : 'Book Service'}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+                      <button
+                        onClick={() => addToCart(worker)}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          backgroundColor: isInCart ? '#16a34a' : '#2563eb',
+                          color: '#ffffff',
+                          fontWeight: '600',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          marginTop: '8px'
+                        }}
+                      >
+                        {isInCart ? '✓ Service Selected (Add More)' : 'Book Service'}
+                      </button>
+                    </div>
+                  );
+                })}
 
     {/* SLIDE-OVER CART DRAWER (MARKETPLACE VIEW) */}
       {isCartOpen && (
