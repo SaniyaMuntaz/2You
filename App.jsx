@@ -311,23 +311,41 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
-  const getPortfolioImages = (worker) => {
-    const rawImages = worker.portfolio_image_urls || worker.portfolio_images || worker.images;
+ const getPortfolioImages = (worker) => {
+    // Check all potential image keys from your MongoDB / FastAPI dataset
+    const rawImages = worker.portfolio_image_urls || worker.portfolio_images || worker.images || worker.working_evidence;
     if (!rawImages) return [];
-    
+
+    let imageList = [];
+
     if (Array.isArray(rawImages)) {
-      return rawImages.filter(url => typeof url === 'string' && url.trim() !== '');
-    }
-    
-    if (typeof rawImages === 'string') {
-      try {
-        const parsed = JSON.parse(rawImages);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {
-        return rawImages.split(',').map(url => url.trim()).filter(url => url !== '');
+      imageList = rawImages;
+    } else if (typeof rawImages === 'string') {
+      const trimmed = rawImages.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          imageList = JSON.parse(trimmed);
+        } catch (e) {
+          imageList = [trimmed];
+        }
+      } else if (trimmed.includes(',')) {
+        imageList = trimmed.split(',').map(url => url.trim());
+      } else {
+        imageList = [trimmed];
       }
     }
-    return [];
+
+    return imageList
+      .filter(url => typeof url === 'string' && url.trim() !== '')
+      .map(url => {
+        const cleanUrl = url.trim();
+        // Automatically convert Google Drive view links into direct viewable image URLs
+        if (cleanUrl.includes('drive.google.com/file/d/')) {
+          const fileId = cleanUrl.split('/d/')[1]?.split('/')[0];
+          if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+        }
+        return cleanUrl;
+      });
   };
 
   const fetchWorkers = async () => {
@@ -1006,19 +1024,22 @@ export default function App() {
                         <span>Trust Score: <strong>{worker.trust_score}</strong></span>
                       </div>
 
-                      {images.length > 0 && (
+                     {images.length > 0 && (
                         <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '12px' }}>
                           {images.map((imgUrl, idx) => (
                             <img 
                               key={idx} 
                               src={imgUrl} 
-                              alt={`${worker.name} sample ${idx + 1}`}
+                              alt={`${worker.name} portfolio ${idx + 1}`}
+                              onError={(e) => {
+                                e.target.onerror = null; 
+                                e.target.src = "https://via.placeholder.com/85x65?text=Sample";
+                              }}
                               style={{ width: '85px', height: '65px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }} 
                             />
                           ))}
                         </div>
                       )}
-                    </div>
 
                     <button
                       onClick={() => addToCart(worker)}
