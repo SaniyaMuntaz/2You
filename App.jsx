@@ -369,15 +369,17 @@ export default function App() {
   };
 
   const addToCart = (worker) => {
-    const exists = cartItems.find(item => item.worker_id === worker.worker_id);
-    if (exists) {
-      setCartItems(cartItems.map(item => 
-        item.worker_id === worker.worker_id ? { ...item, hours: item.hours + 1 } : item
-      ));
-    } else {
-      const rate = worker.hourly_rate || 350;
-      setCartItems([...cartItems, { ...worker, hours: 1, rate }]);
-    }
+    setCartItems((prevCart) => {
+      const exists = prevCart.find((item) => item.worker_id === worker.worker_id);
+      if (exists) {
+        return prevCart.map((item) =>
+          item.worker_id === worker.worker_id ? { ...item, hours: item.hours + 1 } : item
+        );
+      } else {
+        const rate = worker.hourly_rate || 350;
+        return [...prevCart, { ...worker, hours: 1, rate }];
+      }
+    });
     setIsCartOpen(true);
   };
 
@@ -602,10 +604,23 @@ export default function App() {
           const generatedTeams = generateMultiplePackageTeams(selectedPackageCategories, workers);
 
           const selectTeamForCart = (teamMembers) => {
-            teamMembers.forEach((worker) => {
-              if (!cartItems.some((item) => item.worker_id === worker.worker_id)) {
-                addToCart(worker);
-              }
+            setCartItems((prevCart) => {
+              const updatedCart = [...prevCart];
+              
+              teamMembers.forEach((worker) => {
+                const exists = updatedCart.find((item) => item.worker_id === worker.worker_id);
+                if (exists) {
+                  // Increment hours if worker is already in cart
+                  const idx = updatedCart.findIndex((item) => item.worker_id === worker.worker_id);
+                  updatedCart[idx] = { ...updatedCart[idx], hours: updatedCart[idx].hours + 1 };
+                } else {
+                  // Add worker to cart
+                  const rate = worker.hourly_rate || 350;
+                  updatedCart.push({ ...worker, hours: 1, rate });
+                }
+              });
+
+              return updatedCart;
             });
             setIsCartOpen(true);
           };
