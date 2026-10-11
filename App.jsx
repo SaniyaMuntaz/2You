@@ -141,7 +141,28 @@ function FreelancerDashboard({ email, onLogout }) {
     </div>
   );
 }
+// Helper to automatically generate a unified package group with 1 worker per role
+const generatePackageGroups = (selectedCategories, allWorkers) => {
+  const selectedTeam = [];
 
+  selectedCategories.forEach((cat) => {
+    // Find all nearby workers for this category
+    const categoryMatches = allWorkers.filter(
+      (w) => w.category?.toLowerCase() === cat.toLowerCase()
+    );
+
+    if (categoryMatches.length > 0) {
+      // Pick the top-rated worker (or first nearby worker) for this role
+      const topWorker = [...categoryMatches].sort(
+        (a, b) => (b.google_rating || 0) - (a.google_rating || 0)
+      )[0];
+
+      selectedTeam.push(topWorker);
+    }
+  });
+
+  return selectedTeam;
+};
 // ==========================================
 // 2. MAIN APP COMPONENT
 // ==========================================
@@ -495,126 +516,95 @@ export default function App() {
           </div>
         )}
 
-       {/* STEP 2: GROUPED NEARBY FREELANCERS PER SELECTED SERVICE */}
-        {packageStep === 2 && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <div>
-                <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Your Package Team</h2>
-                <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
-                  Nearby professionals found within 20 km of Hitec City, Hyderabad:
-                </p>
-              </div>
-              <button
-                onClick={() => setPackageStep(1)}
-                style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
-              >
-                ← Modify Selected Services
-              </button>
-            </div>
+     {/* STEP 2: AUTOMATICALLY GROUPED TEAM VIEW */}
+        {packageStep === 2 && (() => {
+          const recommendedTeam = generatePackageGroups(selectedPackageCategories, workers);
+          const packageTotal = recommendedTeam.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
+          const isFullTeamSelected = recommendedTeam.every((w) =>
+            cartItems.some((item) => item.worker_id === w.worker_id)
+          );
 
-            {/* Summary Badge */}
-            <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <span style={{ fontSize: '20px' }}>⚡</span>
-              <div>
-                <strong style={{ color: '#1e40af', fontSize: '15px' }}>Combined Service Package ({selectedPackageCategories.length} Services)</strong>
-                <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#3b82f6' }}>
-                  {selectedPackageCategories.join(' • ')}
-                </p>
-              </div>
-            </div>
+          const addEntireTeamToCart = () => {
+            recommendedTeam.forEach((worker) => {
+              if (!cartItems.some((item) => item.worker_id === worker.worker_id)) {
+                addToCart(worker);
+              }
+            });
+            setIsCartOpen(true);
+          };
 
-            {/* Grouped Service Sections */}
-            {selectedPackageCategories.map((cat) => {
-              const categoryWorkers = workers.filter(w => w.category?.toLowerCase() === cat.toLowerCase());
-              
-              return (
-                <div key={cat} style={{ marginBottom: '28px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>{getCategoryIcon(cat)}</span> {cat} Providers
-                    </h3>
-                    <span style={{ fontSize: '12px', backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '12px', fontWeight: '600' }}>
-                      {categoryWorkers.length} nearby found
+          return (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div>
+                  <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Recommended Package Team</h2>
+                  <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
+                    We automatically matched the top-rated nearby provider for each of your selected services:
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPackageStep(1)}
+                  style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                >
+                  ← Modify Selected Services
+                </button>
+              </div>
+
+              {/* UNIFIED PACKAGE TEAM CARD */}
+              <div style={{ backgroundColor: '#ffffff', border: '2px solid #2563eb', borderRadius: '14px', padding: '24px', boxShadow: '0 4px 12px rgba(37,99,235,0.08)', marginBottom: '28px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
+                      AUTOMATIC PACKAGE GROUP
                     </span>
+                    <h3 style={{ margin: '8px 0 0 0', color: '#0f172a', fontSize: '20px' }}>
+                      2You Express Multi-Service Team
+                    </h3>
                   </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b' }}>Combined Team Rate</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2563eb' }}>₹{packageTotal}/hr</div>
+                  </div>
+                </div>
 
-                  {categoryWorkers.length === 0 ? (
-                    <p style={{ color: '#64748b', fontSize: '14px', fontStyle: 'italic', padding: '10px 0' }}>
-                      No verified {cat} professionals available near your current location.
-                    </p>
-                  ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                      {categoryWorkers.map((worker) => {
-                        const isInCart = cartItems.some(item => item.worker_id === worker.worker_id);
-                        return (
-                          <div 
-                            key={worker.worker_id} 
-                            style={{ 
-                              border: isInCart ? '2px solid #16a34a' : '1px solid #cbd5e1', 
-                              padding: '16px', 
-                              borderRadius: '10px', 
-                              backgroundColor: isInCart ? '#f0fdf4' : '#f8fafc',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between'
-                            }}
-                          >
-                            <div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
-                                <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>⭐ {worker.google_rating || '4.5'}</span>
-                              </div>
-                              <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#475569' }}>📍 {worker.address}</p>
-                              <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#2563eb', fontWeight: 'bold' }}>
-                                ₹{worker.hourly_rate || 350}/hr
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={() => addToCart(worker)}
-                              style={{
-                                width: '100%',
-                                padding: '10px',
-                                borderRadius: '6px',
-                                border: 'none',
-                                backgroundColor: isInCart ? '#16a34a' : '#2563eb',
-                                color: '#ffffff',
-                                fontWeight: '600',
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s'
-                              }}
-                            >
-                              {isInCart ? '✓ Selected for Package' : '+ Add to Package Group'}
-                            </button>
-                          </div>
-                        );
-                      })}
+                {/* TEAM MEMBERS GRID */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                  {recommendedTeam.map((worker) => (
+                    <div key={worker.worker_id} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
+                      <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
+                        {getCategoryIcon(worker.category)} {worker.category}
+                      </div>
+                      <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
+                      <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155' }}>
+                        <span>⭐ {worker.google_rating || '4.5'}</span>
+                        <strong>₹{worker.hourly_rate || 350}/hr</strong>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
 
-            {/* Bottom Floating Action Bar */}
-            <div style={{ position: 'sticky', bottom: '20px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-              <div>
-                <span style={{ fontSize: '14px', color: '#64748b' }}>Package Team Members:</span>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>
-                  {cartItems.length} / {selectedPackageCategories.length} Roles Filled
-                </div>
+                {/* ACTION BUTTON */}
+                <button
+                  onClick={addEntireTeamToCart}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: isFullTeamSelected ? '#16a34a' : '#2563eb',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isFullTeamSelected ? '✓ Entire Team Added to Booking Cart' : '🤝 Select Entire Team Package'}
+                </button>
               </div>
-              <button
-                onClick={() => setIsCartOpen(true)}
-                style={{ padding: '14px 28px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
-              >
-                Review Package & Book Team →
-              </button>
             </div>
-          </div>
-        )}
-
+          );
+        })()}
         {/* SLIDE-OVER CART DRAWER */}
         {isCartOpen && (
           <div style={{ position: 'fixed', top: 0, right: 0, width: '380px', height: '100vh', backgroundColor: '#ffffff', boxShadow: '-4px 0 12px rgba(0,0,0,0.15)', zIndex: 1000, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
