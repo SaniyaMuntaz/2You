@@ -237,6 +237,9 @@ export default function App() {
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [negotiationStatus, setNegotiationStatus] = useState(null);
 
+  // Portfolio Modal State
+  const [activePortfolioWorker, setActivePortfolioWorker] = useState(null);
+
   // Chat Feature States & Auto-reply Simulation
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -264,7 +267,6 @@ export default function App() {
     setInputMessage('');
     setIsTyping(true);
 
-    // Dynamic smart responses based on user keywords
     setTimeout(() => {
       let replyText = "Thanks for your message! I'm reviewing your request and will confirm shortly.";
       const lower = userMsg.toLowerCase();
@@ -672,16 +674,25 @@ export default function App() {
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
                         {team.members.map((worker, idx) => (
-                          <div key={`${worker.worker_id}-${idx}`} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
-                            <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
-                              {getCategoryIcon(worker.category)} {worker.category}
+                          <div key={`${worker.worker_id}-${idx}`} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <div>
+                              <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
+                                {getCategoryIcon(worker.category)} {worker.category}
+                              </div>
+                              <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
+                              <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155', marginBottom: '10px' }}>
+                                <span>⭐ {worker.google_rating || '4.5'}</span>
+                                <strong>₹{worker.hourly_rate || 350}/hr</strong>
+                              </div>
                             </div>
-                            <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
-                            <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155' }}>
-                              <span>⭐ {worker.google_rating || '4.5'}</span>
-                              <strong>₹{worker.hourly_rate || 350}/hr</strong>
-                            </div>
+
+                            <button
+                              onClick={() => setActivePortfolioWorker(worker)}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#2563eb', fontWeight: '600', fontSize: '12px', cursor: 'pointer' }}
+                            >
+                              📁 View Portfolio & Works
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -821,7 +832,7 @@ export default function App() {
                 </div>
               ))}
               {isTyping && (
-                <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', italic: 'true' }}>
+                <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontStyle: 'italic' }}>
                   typing response...
                 </div>
               )}
@@ -1044,7 +1055,6 @@ export default function App() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
               {filteredWorkers.map((worker) => {
-                const images = getPortfolioImages(worker);
                 const isInCart = cartItems.some(item => item.worker_id === worker.worker_id);
                 return (
                   <div key={worker.worker_id} style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -1066,22 +1076,28 @@ export default function App() {
                         <span>Trust Score: <strong>{worker.trust_score}</strong></span>
                       </div>
 
-                      {images.length > 0 && (
-                        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '12px' }}>
-                          {images.map((imgUrl, idx) => (
-                            <img 
-                              key={idx} 
-                              src={imgUrl} 
-                              alt={`${worker.name} portfolio ${idx + 1}`}
-                              onError={(e) => {
-                                e.target.onerror = null; 
-                                e.target.src = "https://via.placeholder.com/85x65?text=Sample";
-                              }}
-                              style={{ width: '85px', height: '65px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }} 
-                            />
-                          ))}
-                        </div>
-                      )}
+                      {/* PORTFOLIO / PREVIOUS WORKS BUTTON */}
+                      <button
+                        onClick={() => setActivePortfolioWorker(worker)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#f8fafc',
+                          color: '#2563eb',
+                          fontWeight: '600',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          marginBottom: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        📁 View Portfolio & Previous Works
+                      </button>
                     </div>
 
                     <button
@@ -1106,6 +1122,50 @@ export default function App() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* PORTFOLIO MODAL DIALOG */}
+      {activePortfolioWorker && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.65)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '600px', width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0, color: '#0f172a', fontSize: '20px' }}>{activePortfolioWorker.name}'s Portfolio</h3>
+                <p style={{ margin: '2px 0 0 0', color: '#64748b', fontSize: '13px' }}>{activePortfolioWorker.category} • 📍 {activePortfolioWorker.address}</p>
+              </div>
+              <button onClick={() => setActivePortfolioWorker(null)} style={{ border: 'none', background: 'transparent', fontSize: '22px', cursor: 'pointer', color: '#64748b' }}>✕</button>
+            </div>
+
+            {getPortfolioImages(activePortfolioWorker).length === 0 ? (
+              <p style={{ color: '#64748b', textAlign: 'center', padding: '30px 0' }}>No sample images uploaded by this freelancer yet.</p>
+            ) : (
+              <div>
+                <h4 style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '14px' }}>Previous Work Samples & Evidence:</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                  {getPortfolioImages(activePortfolioWorker).map((imgUrl, idx) => (
+                    <img 
+                      key={idx} 
+                      src={imgUrl} 
+                      alt={`Work sample ${idx + 1}`}
+                      onError={(e) => {
+                        e.target.onerror = null; 
+                        e.target.src = "https://via.placeholder.com/200x150?text=Work+Sample";
+                      }}
+                      style={{ width: '100%', height: '130px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => setActivePortfolioWorker(null)}
+              style={{ width: '100%', marginTop: '20px', padding: '10px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              Close Portfolio
+            </button>
+          </div>
         </div>
       )}
 
@@ -1234,7 +1294,7 @@ export default function App() {
               </div>
             ))}
             {isTyping && (
-              <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', italic: 'true' }}>
+              <div style={{ alignSelf: 'flex-start', backgroundColor: '#e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontStyle: 'italic' }}>
                 typing response...
               </div>
             )}
