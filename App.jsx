@@ -163,6 +163,70 @@ const generatePackageGroups = (selectedCategories, allWorkers) => {
 
   return selectedTeam;
 };
+// Helper to automatically generate multiple team packages (1 worker per selected category)
+const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
+  if (selectedCategories.length === 0) return [];
+
+  // Group nearby workers by category
+  const workersByCategory = {};
+  selectedCategories.forEach((cat) => {
+    workersByCategory[cat] = allWorkers.filter(
+      (w) => w.category?.toLowerCase() === cat.toLowerCase()
+    );
+  });
+
+  // Team 1: Top Rated Professionals
+  const topRatedTeam = selectedCategories.map((cat) => {
+    const matches = workersByCategory[cat] || [];
+    return [...matches].sort((a, b) => (b.google_rating || 0) - (a.google_rating || 0))[0];
+  }).filter(Boolean);
+
+  // Team 2: Best Value / Budget Team
+  const budgetTeam = selectedCategories.map((cat) => {
+    const matches = workersByCategory[cat] || [];
+    return [...matches].sort((a, b) => (a.hourly_rate || 350) - (b.hourly_rate || 350))[0];
+  }).filter(Boolean);
+
+  // Team 3: Alternative Balanced Team
+  const balancedTeam = selectedCategories.map((cat) => {
+    const matches = workersByCategory[cat] || [];
+    // Picks second available or falls back to first
+    return matches[1] || matches[0];
+  }).filter(Boolean);
+
+  const teams = [
+    {
+      id: 'top-rated',
+      name: '⭐ Top Rated Team',
+      badge: 'HIGHEST TRUST SCORE',
+      badgeBg: '#fef3c7',
+      badgeColor: '#92400e',
+      borderColor: '#f59e0b',
+      members: topRatedTeam
+    },
+    {
+      id: 'budget',
+      name: '💰 Best Value Team',
+      badge: 'BUDGET FRIENDLY',
+      badgeBg: '#dcfce7',
+      badgeColor: '#166534',
+      borderColor: '#16a34a',
+      members: budgetTeam
+    },
+    {
+      id: 'balanced',
+      name: '⚡ Fast Response Team',
+      badge: 'POPULAR CHOICE',
+      badgeBg: '#dbeafe',
+      badgeColor: '#1e40af',
+      borderColor: '#2563eb',
+      members: balancedTeam
+    }
+  ];
+
+  // Return teams that have at least one member matched
+  return teams.filter((t) => t.members.length > 0);
+};
 // ==========================================
 // 2. MAIN APP COMPONENT
 // ==========================================
@@ -516,16 +580,12 @@ export default function App() {
           </div>
         )}
 
-     {/* STEP 2: AUTOMATICALLY GROUPED TEAM VIEW */}
+     {/* STEP 2: MULTI-TEAM SELECTION VIEW */}
         {packageStep === 2 && (() => {
-          const recommendedTeam = generatePackageGroups(selectedPackageCategories, workers);
-          const packageTotal = recommendedTeam.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
-          const isFullTeamSelected = recommendedTeam.every((w) =>
-            cartItems.some((item) => item.worker_id === w.worker_id)
-          );
+          const generatedTeams = generateMultiplePackageTeams(selectedPackageCategories, workers);
 
-          const addEntireTeamToCart = () => {
-            recommendedTeam.forEach((worker) => {
+          const selectTeamForCart = (teamMembers) => {
+            teamMembers.forEach((worker) => {
               if (!cartItems.some((item) => item.worker_id === worker.worker_id)) {
                 addToCart(worker);
               }
@@ -537,9 +597,9 @@ export default function App() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Recommended Package Team</h2>
+                  <h2 style={{ fontSize: '22px', color: '#0f172a', margin: 0 }}>Step 2: Choose Your Package Team</h2>
                   <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
-                    We automatically matched the top-rated nearby provider for each of your selected services:
+                    Select from auto-assembled teams of nearby professionals matching your roles:
                   </p>
                 </div>
                 <button
@@ -550,57 +610,77 @@ export default function App() {
                 </button>
               </div>
 
-              {/* UNIFIED PACKAGE TEAM CARD */}
-              <div style={{ backgroundColor: '#ffffff', border: '2px solid #2563eb', borderRadius: '14px', padding: '24px', boxShadow: '0 4px 12px rgba(37,99,235,0.08)', marginBottom: '28px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
-                  <div>
-                    <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
-                      AUTOMATIC PACKAGE GROUP
-                    </span>
-                    <h3 style={{ margin: '8px 0 0 0', color: '#0f172a', fontSize: '20px' }}>
-                      2You Express Multi-Service Team
-                    </h3>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', color: '#64748b' }}>Combined Team Rate</div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2563eb' }}>₹{packageTotal}/hr</div>
-                  </div>
-                </div>
+              {/* RENDER EACH GENERATED TEAM CARD */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {generatedTeams.map((team) => {
+                  const teamTotal = team.members.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
+                  const isTeamInCart = team.members.every((w) =>
+                    cartItems.some((item) => item.worker_id === w.worker_id)
+                  );
 
-                {/* TEAM MEMBERS GRID */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                  {recommendedTeam.map((worker) => (
-                    <div key={worker.worker_id} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
-                      <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
-                        {getCategoryIcon(worker.category)} {worker.category}
+                  return (
+                    <div 
+                      key={team.id} 
+                      style={{ 
+                        backgroundColor: '#ffffff', 
+                        border: `2px solid ${team.borderColor}`, 
+                        borderRadius: '14px', 
+                        padding: '24px', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)' 
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                        <div>
+                          <span style={{ fontSize: '12px', backgroundColor: team.badgeBg, color: team.badgeColor, padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
+                            {team.badge}
+                          </span>
+                          <h3 style={{ margin: '8px 0 0 0', color: '#0f172a', fontSize: '20px' }}>
+                            {team.name} ({team.members.length} Professionals)
+                          </h3>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '13px', color: '#64748b' }}>Combined Rate</div>
+                          <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb' }}>₹{teamTotal}/hr</div>
+                        </div>
                       </div>
-                      <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
-                      <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155' }}>
-                        <span>⭐ {worker.google_rating || '4.5'}</span>
-                        <strong>₹{worker.hourly_rate || 350}/hr</strong>
+
+                      {/* TEAM MEMBERS LIST */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                        {team.members.map((worker) => (
+                          <div key={worker.worker_id} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', backgroundColor: '#f8fafc' }}>
+                            <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 'bold', marginBottom: '4px' }}>
+                              {getCategoryIcon(worker.category)} {worker.category}
+                            </div>
+                            <h4 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '16px' }}>{worker.name}</h4>
+                            <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155' }}>
+                              <span>⭐ {worker.google_rating || '4.5'}</span>
+                              <strong>₹{worker.hourly_rate || 350}/hr</strong>
+                            </div>
+                          </div>
+                        ))}
                       </div>
+
+                      {/* TEAM SELECTION BUTTON */}
+                      <button
+                        onClick={() => selectTeamForCart(team.members)}
+                        style={{
+                          width: '100%',
+                          padding: '14px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          backgroundColor: isTeamInCart ? '#16a34a' : '#2563eb',
+                          color: '#ffffff',
+                          fontWeight: 'bold',
+                          fontSize: '15px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isTeamInCart ? '✓ Team Selected in Booking Cart' : `🤝 Select ${team.name} (₹${teamTotal}/hr)`}
+                      </button>
                     </div>
-                  ))}
-                </div>
-
-                {/* ACTION BUTTON */}
-                <button
-                  onClick={addEntireTeamToCart}
-                  style={{
-                    width: '100%',
-                    padding: '14px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: isFullTeamSelected ? '#16a34a' : '#2563eb',
-                    color: '#ffffff',
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isFullTeamSelected ? '✓ Entire Team Added to Booking Cart' : '🤝 Select Entire Team Package'}
-                </button>
+                  );
+                })}
               </div>
             </div>
           );
