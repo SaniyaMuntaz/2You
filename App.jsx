@@ -1018,10 +1018,150 @@ const timeSlots = [
               flexShrink: 0
             }}
           >
-            Build Package →
-          </button>
-        </div>
-      )}
+{/* MULTI-SERVICE PACKAGE BANNER */}
+{!selectedCategory && (
+  <div
+    style={{
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: '24px',
+      flexWrap: 'wrap',
+      padding: '30px 32px',
+      marginBottom: '32px',
+      background: 'linear-gradient(115deg, #eff6ff 0%, #ffffff 75%, #dbeafe 100%)',
+      border: '1px solid #dbeafe',
+      borderRadius: '18px',
+      boxShadow: '0 6px 20px rgba(37, 99, 235, 0.06)',
+      cursor: 'pointer'
+    }}
+    onClick={() => {
+      setSelectedPackageCategories([]);
+      setPackageStep(1);
+      setIsPackagePageOpen(true);
+    }}
+  >
+    <div style={{ flex: '1', minWidth: '230px' }}>
+      <div
+        style={{
+          display: 'inline-block',
+          padding: '6px 10px',
+          marginBottom: '14px',
+          borderRadius: '6px',
+          backgroundColor: '#dbeafe',
+          color: '#1d4ed8',
+          fontSize: '10px',
+          fontWeight: '800',
+          letterSpacing: '1px'
+        }}
+      >
+        YOUR SERVICES, ONE BOOKING
+      </div>
+
+      <h2
+        style={{
+          margin: '0 0 10px',
+          color: '#172554',
+          fontSize: '26px',
+          lineHeight: '1.25',
+          fontWeight: '800',
+          letterSpacing: '-0.7px'
+        }}
+      >
+        Build Your Package
+      </h2>
+
+      <p
+        style={{
+          margin: '0',
+          maxWidth: '430px',
+          color: '#475569',
+          fontSize: '14px',
+          lineHeight: '1.7'
+        }}
+      >
+        Need more than one service? Combine professionals
+        for your project and manage everything in one booking.
+      </p>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          flexWrap: 'wrap',
+          marginTop: '18px',
+          color: '#334155',
+          fontSize: '12px',
+          fontWeight: '600'
+        }}
+      >
+        <span>✓ Multiple services</span>
+        <span>✓ Choose your team</span>
+      </div>
+    </div>
+
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '16px',
+        flexWrap: 'wrap'
+      }}
+    >
+      <div
+        style={{
+          width: '92px',
+          height: '92px',
+          borderRadius: '22px',
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          border: '1px solid #dbeafe',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '44px',
+          boxShadow: '0 4px 12px rgba(37,99,235,0.06)'
+        }}
+      >
+        🧩
+      </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedPackageCategories([]);
+          setPackageStep(1);
+          setIsPackagePageOpen(true);
+        }}
+        style={{
+          padding: '14px 20px',
+          borderRadius: '9px',
+          border: 'none',
+          backgroundColor: '#2563eb',
+          color: '#ffffff',
+          fontWeight: '700',
+          fontSize: '14px',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 5px 12px rgba(37,99,235,0.20)',
+          transition: 'background-color 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#1d4ed8';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#2563eb';
+        }}
+      >
+        Build Package <span style={{ marginLeft: '6px' }}>→</span>
+      </button>
+    </div>
+  </div>
+)}
+
 
       {loading ? (
         <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Loading services from backend...</p>
