@@ -252,6 +252,12 @@ export default function App() {
 const [bookingDate, setBookingDate] = useState('');
 const [bookingTime, setBookingTime] = useState('');
 
+  
+const [bookingType, setBookingType] = useState('normal');
+
+const PRIORITY_BOOKING_RATE = 0.10;
+
+
 const timeSlots = [
   '9:00 AM - 10:00 AM',
   '10:00 AM - 11:00 AM',
@@ -801,10 +807,7 @@ const timeSlots = [
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
-                  <span>Total Estimated Cost:</span>
-                  <span>₹{calculateTotal()}</span>
-                </div>
+                
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button 
                     onClick={() => alert('Package Booking Placed Successfully! Service providers notified.')}
@@ -1334,6 +1337,53 @@ const timeSlots = [
                 </div>
               )}
               
+{/* BOOKING TYPE SELECTION */}
+{cartItems.length > 0 && (
+  <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+    <h3 style={{ fontSize: '15px', color: '#0f172a', marginBottom: '12px' }}>
+      Choose Your Booking Type
+    </h3>
+
+    <div
+      onClick={() => setBookingType('normal')}
+      style={{
+        padding: '12px',
+        marginBottom: '10px',
+        border: bookingType === 'normal'
+          ? '2px solid #2563eb'
+          : '1px solid #cbd5e1',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        backgroundColor: bookingType === 'normal' ? '#eff6ff' : '#ffffff'
+      }}
+    >
+      <strong style={{ color: '#0f172a' }}>Normal Booking</strong>
+      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+        Standard booking at the regular price.
+      </p>
+    </div>
+
+    <div
+      onClick={() => setBookingType('priority')}
+      style={{
+        padding: '12px',
+        border: bookingType === 'priority'
+          ? '2px solid #2563eb'
+          : '1px solid #cbd5e1',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        backgroundColor: bookingType === 'priority' ? '#eff6ff' : '#ffffff'
+      }}
+    >
+      <strong style={{ color: '#0f172a' }}>Priority Booking</strong>
+      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+        Get priority handling for an additional 10% service charge.
+      </p>
+    </div>
+  </div>
+)}
+
+              
 {/* BOOKING DATE AND TIME SELECTION */}
 <div
   style={{
@@ -1455,19 +1505,64 @@ const timeSlots = [
   )}
 </div>
 
+{/* PRIORITY PRICE BREAKDOWN */}
+{(() => {
+  const basePrice = Number(
+  negotiationStatus === 'accepted'
+    ? negotiatedPrice
+    : calculateTotal()
+) || 0;
+  const priorityFee = bookingType === 'priority'
+    ? Math.round(basePrice * PRIORITY_BOOKING_RATE * 100) / 100
+    : 0;
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
-                <span>Total Estimated Cost:</span>
-                <div style={{ textAlign: 'right' }}>
-                  {negotiationStatus === 'accepted' ? (
-                    <div>
-                      <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '13px', marginRight: '6px' }}>
-                        ₹{calculateTotal()}
-                      </span>
-                      <span style={{ color: '#16a34a', fontSize: '18px', fontWeight: '800' }}>
-                        ₹{negotiatedPrice}
-                      </span>
-                    </div>
+  return (
+    <div style={{
+      padding: '16px',
+      marginBottom: '16px',
+      borderRadius: '12px',
+      background: '#f8fafc',
+      border: '1px solid #e2e8f0'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '10px',
+        fontSize: '14px'
+      }}>
+        <span style={{ color: '#64748b' }}>Service total</span>
+        <span>₹{basePrice.toFixed(2)}</span>
+      </div>
+
+      {bookingType === 'priority' && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '10px',
+          fontSize: '14px',
+          color: '#b45309'
+        }}>
+          <span>Priority booking fee (10%)</span>
+          <span>₹{priorityFee.toFixed(2)}</span>
+        </div>
+      )}
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        paddingTop: '12px',
+        borderTop: '1px solid #e2e8f0',
+        fontSize: '16px',
+        fontWeight: '800',
+        color: '#172554'
+      }}>
+        <span>Total payable</span>
+        <span>₹{(basePrice + priorityFee).toFixed(2)}</span>
+      </div>
+    </div>
+  );
+})()}
+
                   ) : (
                     <span>₹{calculateTotal()}</span>
                   )}
@@ -1477,20 +1572,43 @@ const timeSlots = [
 <div style={{ display: 'flex', gap: '10px' }}>
   <button
     disabled={!bookingDate || !bookingTime}
-    onClick={() => {
-      alert(
-        `Booking Confirmed!\nDate: ${bookingDate}\nTime: ${bookingTime}\nTotal: ₹${
-          negotiationStatus === 'accepted'
-            ? negotiatedPrice
-            : calculateTotal()
-        }\nService providers notified.`
-      );
+    
+onClick={() => {
+  const basePrice = Number(
+    negotiationStatus === 'accepted'
+      ? negotiatedPrice
+      : calculateTotal()
+  ) || 0;
 
-      setCartItems([]);
-      setBookingDate('');
-      setBookingTime('');
-      setIsCartOpen(false);
-    }}
+  const priorityFee =
+    bookingType === 'priority'
+      ? Math.round(
+          basePrice * PRIORITY_BOOKING_RATE * 100
+        ) / 100
+      : 0;
+
+  const finalTotal = basePrice + priorityFee;
+
+  alert(
+    `Booking Confirmed!\n` +
+    `Booking Type: ${bookingType === 'priority' ? 'Priority Booking' : 'Normal Booking'}\n` +
+    `Date: ${bookingDate}\n` +
+    `Time: ${bookingTime}\n` +
+    `Service Total: ₹${basePrice.toFixed(2)}\n` +
+    (bookingType === 'priority'
+      ? `Priority Booking Fee: ₹${priorityFee.toFixed(2)}\n`
+      : '') +
+    `Total Payable: ₹${finalTotal.toFixed(2)}\n` +
+    `Service providers notified.`
+  );
+
+  setCartItems([]);
+  setBookingDate('');
+  setBookingTime('');
+  setBookingType('normal');
+  setIsCartOpen(false);
+}}
+
     style={{
       flex: 1,
       padding: '12px 8px',
