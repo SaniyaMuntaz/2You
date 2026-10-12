@@ -1033,7 +1033,21 @@ const timeSlots = [
         Need more than one service? Combine professionals
         for your project and manage everything in one booking.
       </p>
-
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    flexWrap: 'wrap',
+    marginTop: '18px',
+    color: '#334155',
+    fontSize: '12px',
+    fontWeight: '600'
+  }}
+>
+  <span>✓ Multiple services</span>
+  <span>✓ Choose your team</span>
+</div>
      
     </div>
 
