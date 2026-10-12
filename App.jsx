@@ -248,6 +248,23 @@ export default function App() {
   const [negotiatedPrice, setNegotiatedPrice] = useState(null);
   const [negotiationStatus, setNegotiationStatus] = useState(null);
 
+  
+const [bookingDate, setBookingDate] = useState('');
+const [bookingTime, setBookingTime] = useState('');
+
+const timeSlots = [
+  '9:00 AM - 10:00 AM',
+  '10:00 AM - 11:00 AM',
+  '11:00 AM - 12:00 PM',
+  '12:00 PM - 1:00 PM',
+  '1:00 PM - 2:00 PM',
+  '2:00 PM - 3:00 PM',
+  '3:00 PM - 4:00 PM',
+  '4:00 PM - 5:00 PM',
+  '5:00 PM - 6:00 PM',
+];
+
+
   // Portfolio Modal State
   const [activePortfolioWorker, setActivePortfolioWorker] = useState(null);
 
@@ -1249,6 +1266,128 @@ export default function App() {
                   🎉 Negotiated for ₹{negotiatedPrice}
                 </div>
               )}
+              
+{/* BOOKING DATE AND TIME SELECTION */}
+<div
+  style={{
+    marginBottom: '18px',
+    padding: '14px',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+  }}
+>
+  <h3 style={{
+    margin: '0 0 12px',
+    fontSize: '16px',
+    color: '#0f172a'
+  }}>
+    Schedule Your Service
+  </h3>
+
+  {/* Date Picker */}
+  <label style={{
+    display: 'block',
+    fontSize: '13px',
+    fontWeight: '600',
+    marginBottom: '6px',
+    color: '#334155'
+  }}>
+    Select Date
+  </label>
+
+  <input
+    type="date"
+    value={bookingDate}
+    min={new Date().getFullYear() + '-' +
+      String(new Date().getMonth() + 1).padStart(2, '0') + '-' +
+      String(new Date().getDate()).padStart(2, '0')}
+    onChange={(e) => {
+      setBookingDate(e.target.value);
+      setBookingTime('');
+    }}
+    style={{
+      width: '100%',
+      padding: '10px',
+      border: '1px solid #cbd5e1',
+      borderRadius: '6px',
+      boxSizing: 'border-box',
+      marginBottom: '16px',
+      fontSize: '14px',
+      backgroundColor: '#ffffff'
+    }}
+  />
+
+  {/* Time Slot Selection */}
+  <label style={{
+    display: 'block',
+    fontSize: '13px',
+    fontWeight: '600',
+    marginBottom: '8px',
+    color: '#334155'
+  }}>
+    Select Time Slot
+  </label>
+
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '8px'
+  }}>
+    {timeSlots.map((slot) => (
+      <button
+        key={slot}
+        type="button"
+        disabled={!bookingDate}
+        onClick={() => setBookingTime(slot)}
+        style={{
+          padding: '10px 5px',
+          borderRadius: '6px',
+          border: bookingTime === slot
+            ? '2px solid #2563eb'
+            : '1px solid #cbd5e1',
+          backgroundColor: bookingTime === slot
+            ? '#dbeafe'
+            : '#ffffff',
+          color: bookingTime === slot
+            ? '#1d4ed8'
+            : '#334155',
+          fontWeight: bookingTime === slot ? '700' : '500',
+          fontSize: '12px',
+          cursor: bookingDate ? 'pointer' : 'not-allowed',
+          opacity: bookingDate ? 1 : 0.5
+        }}
+      >
+        {slot}
+      </button>
+    ))}
+  </div>
+
+  {!bookingDate && (
+    <p style={{
+      fontSize: '12px',
+      color: '#64748b',
+      marginBottom: 0
+    }}>
+      Please select a date first to view time slots.
+    </p>
+  )}
+
+  {bookingDate && bookingTime && (
+    <p style={{
+      fontSize: '13px',
+      color: '#166534',
+      backgroundColor: '#dcfce7',
+      padding: '10px',
+      borderRadius: '6px',
+      marginBottom: 0,
+      marginTop: '12px'
+    }}>
+      Selected: {bookingDate} | {bookingTime}
+    </p>
+  )}
+</div>
+
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '16px' }}>
                 <span>Total Estimated Cost:</span>
@@ -1268,26 +1407,69 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button 
-                  onClick={() => alert(`Order Placed Successfully for ${negotiationStatus === 'accepted' ? `₹${negotiatedPrice}` : `₹${calculateTotal()}`}! Service providers notified.`)}
-                  style={{ flex: 1, padding: '12px 8px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
-                >
-                  Confirm Booking
-                </button>
-                <button 
-                  onClick={() => {
-                    const proposedPrice = prompt(`The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`, calculateTotal());
-                    if (proposedPrice && !isNaN(proposedPrice)) {
-                      setNegotiatedPrice(proposedPrice);
-                      setNegotiationStatus('pending');
-                    }
-                  }}
-                  style={{ flex: 1, padding: '12px 8px', backgroundColor: '#eab308', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
-                >
-                  {negotiationStatus === 'pending' ? 'Update Offer' : 'Negotiate Price'}
-                </button>
-              </div>
+<div style={{ display: 'flex', gap: '10px' }}>
+  <button
+    disabled={!bookingDate || !bookingTime}
+    onClick={() => {
+      alert(
+        `Booking Confirmed!\nDate: ${bookingDate}\nTime: ${bookingTime}\nTotal: ₹${
+          negotiationStatus === 'accepted'
+            ? negotiatedPrice
+            : calculateTotal()
+        }\nService providers notified.`
+      );
+
+      setCartItems([]);
+      setBookingDate('');
+      setBookingTime('');
+      setIsCartOpen(false);
+    }}
+    style={{
+      flex: 1,
+      padding: '12px 8px',
+      backgroundColor:
+        !bookingDate || !bookingTime ? '#94a3b8' : '#16a34a',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '6px',
+      fontWeight: 'bold',
+      fontSize: '14px',
+      cursor:
+        !bookingDate || !bookingTime ? 'not-allowed' : 'pointer',
+      opacity: !bookingDate || !bookingTime ? 0.7 : 1
+    }}
+  >
+    Confirm Booking
+  </button>
+
+  <button
+    onClick={() => {
+      const proposedPrice = prompt(
+        `The current total is ₹${calculateTotal()}. Enter your proposed price (₹):`,
+        calculateTotal()
+      );
+
+      if (proposedPrice && !isNaN(proposedPrice)) {
+        setNegotiatedPrice(proposedPrice);
+        setNegotiationStatus('pending');
+      }
+    }}
+    style={{
+      flex: 1,
+      padding: '12px 8px',
+      backgroundColor: '#eab308',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '6px',
+      fontWeight: 'bold',
+      fontSize: '14px',
+      cursor: 'pointer'
+    }}
+  >
+    Negotiate Price
+  </button>
+</div>
+
             </div>
           )}
         </div>
