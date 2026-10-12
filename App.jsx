@@ -967,63 +967,16 @@ const timeSlots = [
         />
       </div>
 
-      {/* MULTI-SERVICE PACKAGE BANNER */}
-      {!selectedCategory && (
-        <div
-          onClick={() => {
-            setSelectedPackageCategories([]);
-            setPackageStep(1);
-            setIsPackagePageOpen(true);
-          }}
-          style={{
-            backgroundColor: '#eff6ff',
-            border: '1px solid #93c5fd',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '28px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(37,99,235,0.08)',
-            gap: '16px'
-          }}
-        >
-          <div>
-            <h2 style={{ margin: '0 0 5px 0', fontSize: '20px', color: '#1e40af', fontWeight: '700' }}>
-              🧩 Build Your Package
-            </h2>
-            <p style={{ margin: 0, color: '#475569', fontSize: '14px', fontWeight: '500' }}>
-              BOOK MULTISERVICE
-            </p>
-          </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedPackageCategories([]);
-              setPackageStep(1);
-              setIsPackagePageOpen(true);
-            }}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              fontWeight: '600',
-              fontSize: '14px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
-          >
 {/* MULTI-SERVICE PACKAGE BANNER */}
 {!selectedCategory && (
   <div
+    onClick={() => {
+      setSelectedPackageCategories([]);
+      setPackageStep(1);
+      setIsPackagePageOpen(true);
+    }}
     style={{
-      position: 'relative',
-      overflow: 'hidden',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -1036,11 +989,6 @@ const timeSlots = [
       borderRadius: '18px',
       boxShadow: '0 6px 20px rgba(37, 99, 235, 0.06)',
       cursor: 'pointer'
-    }}
-    onClick={() => {
-      setSelectedPackageCategories([]);
-      setPackageStep(1);
-      setIsPackagePageOpen(true);
     }}
   >
     <div style={{ flex: '1', minWidth: '230px' }}>
@@ -1075,7 +1023,7 @@ const timeSlots = [
 
       <p
         style={{
-          margin: '0',
+          margin: 0,
           maxWidth: '430px',
           color: '#475569',
           fontSize: '14px',
@@ -1146,21 +1094,15 @@ const timeSlots = [
           fontSize: '14px',
           cursor: 'pointer',
           whiteSpace: 'nowrap',
-          boxShadow: '0 5px 12px rgba(37,99,235,0.20)',
-          transition: 'background-color 0.2s ease'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#1d4ed8';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#2563eb';
+          boxShadow: '0 5px 12px rgba(37,99,235,0.20)'
         }}
       >
-        Build Package <span style={{ marginLeft: '6px' }}>→</span>
+        Build Package →
       </button>
     </div>
   </div>
 )}
+
 
 
       {loading ? (
