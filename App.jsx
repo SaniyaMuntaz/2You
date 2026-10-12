@@ -140,6 +140,17 @@ function FreelancerDashboard({ email, onLogout }) {
     </div>
   );
 }
+const getWorkerRate = (worker) => {
+  if (Number(worker.hourly_rate) > 0) {
+    return Number(worker.hourly_rate);
+  }
+
+  const idNumber = Number(
+    String(worker.worker_id || "0").replace(/\D/g, "")
+  );
+
+  return 200 + ((idNumber * 37) % 7) * 50;
+};
 
 // Helper to automatically generate multiple team packages
 const generateMultiplePackageTeams = (selectedCategories, allWorkers) => {
@@ -398,7 +409,7 @@ export default function App() {
           item.worker_id === worker.worker_id ? { ...item, hours: item.hours + 1 } : item
         );
       } else {
-        const rate = worker.hourly_rate || 350;
+        const rate = getWorkerRate(worker);
         return [...prevCart, { ...worker, hours: 1, rate }];
       }
     });
@@ -604,7 +615,7 @@ export default function App() {
                   const idx = updatedCart.findIndex((item) => item.worker_id === worker.worker_id);
                   updatedCart[idx] = { ...updatedCart[idx], hours: updatedCart[idx].hours + 1 };
                 } else {
-                  const rate = worker.hourly_rate || 350;
+                  const rate = getWorkerRate(worker);
                   updatedCart.push({ ...worker, hours: 1, rate });
                 }
               });
@@ -633,7 +644,10 @@ export default function App() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {generatedTeams.map((team) => {
-                  const teamTotal = team.members.reduce((sum, w) => sum + (w.hourly_rate || 350), 0);
+                 const teamTotal = team.members.reduce(
+  (sum, worker) => sum + getWorkerRate(worker),
+  0
+);
                   const isTeamInCart = team.members.every((w) =>
                     cartItems.some((item) => item.worker_id === w.worker_id)
                   );
@@ -677,7 +691,7 @@ export default function App() {
                                 <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: '#64748b' }}>📍 {worker.address}</p>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#334155', marginBottom: '10px' }}>
                                   <span>⭐ {worker.google_rating || '4.5'}</span>
-                                  <strong>₹{worker.hourly_rate || 350}/hr</strong>
+                             <strong>₹{getWorkerRate(worker)}/hr</strong>
                                 </div>
                               </div>
 
