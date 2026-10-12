@@ -1563,11 +1563,6 @@ const timeSlots = [
   );
 })()}
 
-                  ) : (
-                    <span>₹{calculateTotal()}</span>
-                  )}
-                </div>
-              </div>
 
 <div style={{ display: 'flex', gap: '10px' }}>
   <button
