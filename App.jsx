@@ -1337,6 +1337,7 @@ const timeSlots = [
                 </div>
               )}
               
+
 {/* BOOKING TYPE SELECTION */}
 {cartItems.length > 0 && (
   <div style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -1344,6 +1345,7 @@ const timeSlots = [
       Choose Your Booking Type
     </h3>
 
+    {/* Schedule Booking */}
     <div
       onClick={() => setBookingType('normal')}
       style={{
@@ -1357,14 +1359,13 @@ const timeSlots = [
         backgroundColor: bookingType === 'normal' ? '#eff6ff' : '#ffffff'
       }}
     >
-      
-<strong style={{ color: '#0f172a' }}>Priority Booking</strong>
-<p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
-  Book now without scheduling. An additional 10% priority fee applies.
-</p>
-
+      <strong style={{ color: '#0f172a' }}>Schedule Booking</strong>
+      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+        Choose your preferred date and time for the service.
+      </p>
     </div>
 
+    {/* Priority Booking */}
     <div
       onClick={() => setBookingType('priority')}
       style={{
@@ -1377,20 +1378,17 @@ const timeSlots = [
         backgroundColor: bookingType === 'priority' ? '#eff6ff' : '#ffffff'
       }}
     >
-      
-
-<strong style={{ color: '#0f172a' }}>Priority Booking</strong>
-<p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
-  Book now without scheduling. An additional 10% priority fee applies.
-</p>
-
-
+      <strong style={{ color: '#0f172a' }}>Priority Booking</strong>
+      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+        Request the service now without scheduling. An additional 10% priority fee applies.
+      </p>
     </div>
   </div>
 )}
 
+
   {bookingType === 'normal' && (            
-{/* BOOKING DATE AND TIME SELECTION */}
+
 <div
   style={{
     marginBottom: '18px',
