@@ -1357,10 +1357,12 @@ const timeSlots = [
         backgroundColor: bookingType === 'normal' ? '#eff6ff' : '#ffffff'
       }}
     >
-      <strong style={{ color: '#0f172a' }}>Normal Booking</strong>
-      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
-        Standard booking at the regular price.
-      </p>
+      
+<strong style={{ color: '#0f172a' }}>Priority Booking</strong>
+<p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+  Book now without scheduling. An additional 10% priority fee applies.
+</p>
+
     </div>
 
     <div
@@ -1375,15 +1377,19 @@ const timeSlots = [
         backgroundColor: bookingType === 'priority' ? '#eff6ff' : '#ffffff'
       }}
     >
-      <strong style={{ color: '#0f172a' }}>Priority Booking</strong>
-      <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
-        Get priority handling for an additional 10% service charge.
-      </p>
+      
+
+<strong style={{ color: '#0f172a' }}>Priority Booking</strong>
+<p style={{ margin: '5px 0 0', fontSize: '12px', color: '#64748b' }}>
+  Book now without scheduling. An additional 10% priority fee applies.
+</p>
+
+
     </div>
   </div>
 )}
 
-              
+  {bookingType === 'normal' && (            
 {/* BOOKING DATE AND TIME SELECTION */}
 <div
   style={{
@@ -1504,17 +1510,24 @@ const timeSlots = [
     </p>
   )}
 </div>
+          )}
 
 {/* PRIORITY PRICE BREAKDOWN */}
 {(() => {
-  const basePrice = Number(
+  
+const basePrice = Number(
   negotiationStatus === 'accepted'
     ? negotiatedPrice
     : calculateTotal()
 ) || 0;
-  const priorityFee = bookingType === 'priority'
-    ? Math.round(basePrice * PRIORITY_BOOKING_RATE * 100) / 100
+
+const priorityFee =
+  bookingType === 'priority'
+    ? Math.round(basePrice * 0.10 * 100) / 100
     : 0;
+
+const finalTotal = basePrice + priorityFee;
+
 
   return (
     <div style={{
@@ -1557,7 +1570,7 @@ const timeSlots = [
         color: '#172554'
       }}>
         <span>Total payable</span>
-        <span>₹{(basePrice + priorityFee).toFixed(2)}</span>
+        <span>₹{finalTotal.toFixed(2)}</span>
       </div>
     </div>
   );
@@ -1566,7 +1579,10 @@ const timeSlots = [
 
 <div style={{ display: 'flex', gap: '10px' }}>
   <button
-    disabled={!bookingDate || !bookingTime}
+   disabled={
+  bookingType === 'normal' &&
+  (!bookingDate || !bookingTime)
+}
     
 onClick={() => {
   const basePrice = Number(
@@ -1584,18 +1600,20 @@ onClick={() => {
 
   const finalTotal = basePrice + priorityFee;
 
-  alert(
-    `Booking Confirmed!\n` +
-    `Booking Type: ${bookingType === 'priority' ? 'Priority Booking' : 'Normal Booking'}\n` +
-    `Date: ${bookingDate}\n` +
-    `Time: ${bookingTime}\n` +
-    `Service Total: ₹${basePrice.toFixed(2)}\n` +
-    (bookingType === 'priority'
-      ? `Priority Booking Fee: ₹${priorityFee.toFixed(2)}\n`
-      : '') +
-    `Total Payable: ₹${finalTotal.toFixed(2)}\n` +
-    `Service providers notified.`
-  );
+
+alert(
+  `Booking Confirmed!\n` +
+  `Booking Type: ${bookingType === 'priority' ? 'Priority Booking' : 'Schedule Booking'}\n` +
+  (bookingType === 'normal'
+    ? `Date: ${bookingDate}\nTime: ${bookingTime}\n`
+    : 'Booking: Immediate priority request\n') +
+  `Service Total: ₹${basePrice.toFixed(2)}\n` +
+  (bookingType === 'priority'
+    ? `Priority Booking Fee: ₹${priorityFee.toFixed(2)}\n`
+    : '') +
+  `Total Payable: ₹${finalTotal.toFixed(2)}\n` +
+  `Service providers notified.`
+);
 
   setCartItems([]);
   setBookingDate('');
@@ -1604,20 +1622,28 @@ onClick={() => {
   setIsCartOpen(false);
 }}
 
-    style={{
-      flex: 1,
-      padding: '12px 8px',
-      backgroundColor:
-        !bookingDate || !bookingTime ? '#94a3b8' : '#16a34a',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '6px',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      cursor:
-        !bookingDate || !bookingTime ? 'not-allowed' : 'pointer',
-      opacity: !bookingDate || !bookingTime ? 0.7 : 1
-    }}
+style={{
+  flex: 1,
+  padding: '12px 8px',
+  backgroundColor:
+    bookingType === 'normal' && (!bookingDate || !bookingTime)
+      ? '#94a3b8'
+      : '#16a34a',
+  color: '#ffffff',
+  border: 'none',
+  borderRadius: '6px',
+  fontWeight: 'bold',
+  fontSize: '14px',
+  cursor:
+    bookingType === 'normal' && (!bookingDate || !bookingTime)
+      ? 'not-allowed'
+      : 'pointer',
+  opacity:
+    bookingType === 'normal' && (!bookingDate || !bookingTime)
+      ? 0.7
+      : 1
+}}
+
   >
     Confirm Booking
   </button>
