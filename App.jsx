@@ -1060,22 +1060,7 @@ const timeSlots = [
         flexWrap: 'wrap'
       }}
     >
-      <div
-        style={{
-          width: '92px',
-          height: '92px',
-          borderRadius: '22px',
-          backgroundColor: 'rgba(255,255,255,0.85)',
-          border: '1px solid #dbeafe',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '44px',
-          boxShadow: '0 4px 12px rgba(37,99,235,0.06)'
-        }}
-      >
-        🧩
-      </div>
+      
 
       <button
         onClick={(e) => {
@@ -1097,7 +1082,7 @@ const timeSlots = [
           boxShadow: '0 5px 12px rgba(37,99,235,0.20)'
         }}
       >
-        Build Package →
+        Build Your Package →
       </button>
     </div>
   </div>
