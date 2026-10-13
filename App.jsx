@@ -241,6 +241,7 @@ export default function App() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNewFreelancers, setShowNewFreelancers] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [cartItems, setCartItems] = useState([]);
@@ -461,16 +462,28 @@ const timeSlots = [
     cat.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
 
-  const filteredWorkers = workers.filter((worker) => {
-    if (!selectedCategory) return false;
-    const matchesCategory = worker.category?.toLowerCase() === selectedCategory.toLowerCase();
-    const query = searchQuery.toLowerCase().trim();
-    const matchesSearch = !query || (
-      worker.name?.toLowerCase().includes(query) ||
-      worker.address?.toLowerCase().includes(query)
-    );
-    return matchesCategory && matchesSearch;
-  });
+const filteredWorkers = workers.filter((worker) => {
+  if (!selectedCategory) return false;
+
+  const matchesCategory =
+    worker.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+  const query = searchQuery.toLowerCase().trim();
+
+  const matchesSearch = !query || (
+    worker.name?.toLowerCase().includes(query) ||
+    worker.address?.toLowerCase().includes(query)
+  );
+
+  const isNewFreelancer =
+    String(worker.is_new_freelancer).toLowerCase() === 'yes';
+
+  return (
+    matchesCategory &&
+    matchesSearch &&
+    (!showNewFreelancers || isNewFreelancer)
+  );
+});
 
   // FEATURE 1: LOGIN PAGE
   if (!isLoggedIn) {
@@ -1140,6 +1153,68 @@ const timeSlots = [
 
         /* VIEW 2: FREELANCERS LIST */
         <div>
+          {selectedCategory && (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: '16px',
+      flexWrap: 'wrap',
+      padding: '18px 20px',
+      marginBottom: '24px',
+      border: '1px solid #bfdbfe',
+      borderRadius: '12px',
+      background: 'linear-gradient(110deg, #eff6ff, #ffffff)',
+    }}
+  >
+    <div style={{ flex: 1, minWidth: '220px' }}>
+      <span style={{
+        color: '#1d4ed8',
+        fontSize: '11px',
+        fontWeight: '800',
+      }}>
+        FIRST BOOKING OFFER
+      </span>
+
+      <h3 style={{ margin: '8px 0', color: '#172554' }}>
+        Give a New Freelancer a Chance
+      </h3>
+
+      <p style={{ margin: 0, color: '#475569', fontSize: '13px' }}>
+        Try an emerging {selectedCategory.toLowerCase()} and get
+        15% off your first eligible booking.
+      </p>
+
+      <p style={{
+        margin: '8px 0 0',
+        color: '#1d4ed8',
+        fontWeight: '700',
+        fontSize: '12px',
+      }}>
+        Coupon: NEW2YOU15
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onClick={() => setShowNewFreelancers(prev => !prev)}
+      style={{
+        padding: '12px 16px',
+        backgroundColor: '#2563eb',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '7px',
+        fontWeight: '700',
+        cursor: 'pointer',
+      }}
+    >
+      {showNewFreelancers
+        ? 'Show All Freelancers'
+        : 'Explore New Freelancers →'}
+    </button>
+  </div>
+)}
           <h2 style={{ fontSize: '22px', color: '#0f172a', marginBottom: '20px' }}>
             {getCategoryIcon(selectedCategory)} {selectedCategory} Professionals
           </h2>
