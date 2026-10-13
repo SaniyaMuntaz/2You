@@ -462,6 +462,7 @@ const timeSlots = [
     cat.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
 
+
 const filteredWorkers = workers.filter((worker) => {
   if (!selectedCategory) return false;
 
@@ -484,6 +485,7 @@ const filteredWorkers = workers.filter((worker) => {
     (!showNewFreelancers || isNewFreelancer)
   );
 });
+
 
   // FEATURE 1: LOGIN PAGE
   if (!isLoggedIn) {
