@@ -899,6 +899,60 @@ const filteredWorkers = workers.filter((worker) => {
       </div>
     );
   }
+  const projectCardStyle = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '24px',
+  padding: '16px',
+  backgroundColor: '#ffffff',
+  border: '1px solid #dbeafe',
+  borderRadius: '14px',
+  boxShadow: '0 3px 12px rgba(15, 23, 42, 0.04)',
+};
+
+const projectImageStyle = {
+  width: '180px',
+  minHeight: '120px',
+  borderRadius: '10px',
+  backgroundColor: '#eff6ff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '48px',
+};
+
+const projectContentStyle = {
+  flex: 1,
+  minWidth: '220px',
+};
+
+const projectTitleStyle = {
+  margin: '0 0 8px',
+  color: '#0f172a',
+  fontSize: '21px',
+  fontWeight: '800',
+};
+
+const projectDescriptionStyle = {
+  margin: '0 0 16px',
+  color: '#64748b',
+  fontSize: '14px',
+  lineHeight: '1.6',
+};
+
+const projectButtonStyle = {
+  padding: '12px 18px',
+  backgroundColor: '#2563eb',
+  color: '#ffffff',
+  border: 'none',
+  borderRadius: '8px',
+  fontWeight: '700',
+  cursor: 'pointer',
+  fontSize: '14px',
+};
+  
 
   // FEATURE 2: CUSTOMER MARKETPLACE VIEW
   return (
@@ -1150,6 +1204,178 @@ const filteredWorkers = workers.filter((worker) => {
               ))}
             </div>
           )}
+          {/* POPULAR SERVICE PACKAGES */}
+<div style={{ marginTop: '36px', marginBottom: '32px' }}>
+  <div
+    style={{
+      display: 'inline-block',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      backgroundColor: '#dbeafe',
+      color: '#2563eb',
+      fontSize: '11px',
+      fontWeight: '800',
+      letterSpacing: '1px',
+      marginBottom: '12px',
+    }}
+  >
+    POPULAR SERVICE PACKAGES
+  </div>
+
+  <h2 style={{
+    fontSize: '30px',
+    color: '#0f172a',
+    margin: '0 0 8px',
+    fontWeight: '800',
+  }}>
+    What do you need done?
+  </h2>
+
+  <p style={{
+    color: '#64748b',
+    fontSize: '16px',
+    margin: '0 0 24px',
+  }}>
+    Choose a project and find the right professionals in one go.
+  </p>
+
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '18px',
+  }}>
+
+    {/* RENOVATION */}
+    <div style={projectCardStyle}>
+      <div style={projectImageStyle}>🏠</div>
+      <div style={projectContentStyle}>
+        <h3 style={projectTitleStyle}>Renovate Your Home</h3>
+        <p style={projectDescriptionStyle}>
+          Plan repairs, painting, carpentry and electrical work together.
+        </p>
+        <button
+          style={projectButtonStyle}
+          onClick={() => {
+            const matched = categories.filter(cat =>
+              /carpenter|painter|electrician|plumb/i.test(cat)
+            );
+            setSelectedPackageCategories(matched);
+            setPackageStep(1);
+            setIsPackagePageOpen(true);
+          }}
+        >
+          Build My Renovation Team →
+        </button>
+      </div>
+    </div>
+
+    {/* PHOTOSHOOT */}
+    <div style={projectCardStyle}>
+      <div style={projectImageStyle}>📸</div>
+      <div style={projectContentStyle}>
+        <h3 style={projectTitleStyle}>Book a Photoshoot</h3>
+        <p style={projectDescriptionStyle}>
+          Find a photographer and book your shoot.
+        </p>
+        <button
+          style={projectButtonStyle}
+          onClick={() => {
+            const match = categories.find(cat =>
+              /photograph/i.test(cat)
+            );
+            if (match) {
+              setSelectedCategory(match);
+              setSearchQuery('');
+              setShowNewFreelancers(false);
+            } else {
+              alert('Photographer services are not available yet.');
+            }
+          }}
+        >
+          Book a Photoshoot →
+        </button>
+      </div>
+    </div>
+
+    {/* CLEANING */}
+    <div style={projectCardStyle}>
+      <div style={projectImageStyle}>🧹</div>
+      <div style={projectContentStyle}>
+        <h3 style={projectTitleStyle}>Deep Clean My Home</h3>
+        <p style={projectDescriptionStyle}>
+          Find cleaning professionals for your home.
+        </p>
+        <button
+          style={projectButtonStyle}
+          onClick={() => {
+            const match = categories.find(cat =>
+              /clean/i.test(cat)
+            );
+            if (match) {
+              setSelectedCategory(match);
+              setSearchQuery('');
+              setShowNewFreelancers(false);
+            } else {
+              alert('Cleaning services are not available yet.');
+            }
+          }}
+        >
+          Book Cleaning →
+        </button>
+      </div>
+    </div>
+
+    {/* EVENT */}
+    <div style={projectCardStyle}>
+      <div style={projectImageStyle}>🎉</div>
+      <div style={projectContentStyle}>
+        <h3 style={projectTitleStyle}>Plan an Event</h3>
+        <p style={projectDescriptionStyle}>
+          Bring together the professionals you need for your event.
+        </p>
+        <button
+          style={projectButtonStyle}
+          onClick={() => {
+            const matched = categories.filter(cat =>
+              /photograph|makeup|beautician|cook|clean/i.test(cat)
+            );
+            setSelectedPackageCategories(matched);
+            setPackageStep(1);
+            setIsPackagePageOpen(true);
+          }}
+        >
+          Plan My Event →
+        </button>
+      </div>
+    </div>
+
+    {/* CUSTOM PACKAGE */}
+    <div style={{
+      ...projectCardStyle,
+      backgroundColor: '#eff6ff',
+      borderColor: '#bfdbfe',
+    }}>
+      <div style={projectImageStyle}>📋</div>
+      <div style={projectContentStyle}>
+        <h3 style={projectTitleStyle}>Have a Different Project in Mind?</h3>
+        <p style={projectDescriptionStyle}>
+          Create a custom package with multiple services for your needs.
+        </p>
+        <button
+          style={projectButtonStyle}
+          onClick={() => {
+            setSelectedPackageCategories([]);
+            setPackageStep(1);
+            setIsPackagePageOpen(true);
+          }}
+        >
+          Build a Custom Package →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
         </div>
       ) : (
 
