@@ -912,16 +912,23 @@ const filteredWorkers = workers.filter((worker) => {
   boxShadow: '0 3px 12px rgba(15, 23, 42, 0.04)',
 };
 
+
 const projectImageStyle = {
-  width: '180px',
-  minHeight: '120px',
+  width: '350px',
+  height: '258px',
+  flexShrink: 0,
   borderRadius: '10px',
+  overflow: 'hidden',
   backgroundColor: '#eff6ff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '48px',
 };
+
+const projectPhotoStyle = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
+};
+
 
 const projectContentStyle = {
   flex: 1,
@@ -1247,7 +1254,15 @@ const projectButtonStyle = {
 
     {/* RENOVATION */}
     <div style={projectCardStyle}>
-      <div style={projectImageStyle}>🏠</div>
+    
+<div style={projectImageStyle}>
+  <img
+    src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80"
+    alt="Modern living room"
+    style={projectPhotoStyle}
+  />
+</div>
+
       <div style={projectContentStyle}>
         <h3 style={projectTitleStyle}>Renovate Your Home</h3>
         <p style={projectDescriptionStyle}>
