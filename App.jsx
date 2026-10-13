@@ -1257,7 +1257,7 @@ const projectButtonStyle = {
     
 <div style={projectImageStyle}>
   <img
-    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+    src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80"
     alt="Professional photoshoot"
     style={projectPhotoStyle}
   />
