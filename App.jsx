@@ -1255,10 +1255,11 @@ const projectButtonStyle = {
     {/* RENOVATION */}
     <div style={projectCardStyle}>
     
+
 <div style={projectImageStyle}>
   <img
-    src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80"
-    alt="Professional photoshoot"
+    src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80"
+    alt="Modern living room"
     style={projectPhotoStyle}
   />
 </div>
@@ -1289,7 +1290,7 @@ const projectButtonStyle = {
       
 <div style={projectImageStyle}>
   <img
-    src="https://images.unsplash.com/photo-撮影"
+    src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80"
     alt="Professional photoshoot"
     style={projectPhotoStyle}
   />
