@@ -1286,7 +1286,15 @@ const projectButtonStyle = {
 
     {/* PHOTOSHOOT */}
     <div style={projectCardStyle}>
-      <div style={projectImageStyle}>📸</div>
+      
+<div style={projectImageStyle}>
+  <img
+    src="https://images.unsplash.com/photo-撮影"
+    alt="Professional photoshoot"
+    style={projectPhotoStyle}
+  />
+</div>
+
       <div style={projectContentStyle}>
         <h3 style={projectTitleStyle}>Book a Photoshoot</h3>
         <p style={projectDescriptionStyle}>
@@ -1314,7 +1322,15 @@ const projectButtonStyle = {
 
     {/* CLEANING */}
     <div style={projectCardStyle}>
-      <div style={projectImageStyle}>🧹</div>
+     
+<div style={projectImageStyle}>
+  <img
+    src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80"
+    alt="Home cleaning"
+    style={projectPhotoStyle}
+  />
+</div>
+
       <div style={projectContentStyle}>
         <h3 style={projectTitleStyle}>Deep Clean My Home</h3>
         <p style={projectDescriptionStyle}>
@@ -1342,7 +1358,15 @@ const projectButtonStyle = {
 
     {/* EVENT */}
     <div style={projectCardStyle}>
-      <div style={projectImageStyle}>🎉</div>
+     
+<div style={projectImageStyle}>
+  <img
+    src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80"
+    alt="Elegant event setup"
+    style={projectPhotoStyle}
+  />
+</div>
+
       <div style={projectContentStyle}>
         <h3 style={projectTitleStyle}>Plan an Event</h3>
         <p style={projectDescriptionStyle}>
